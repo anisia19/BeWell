@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Accelerometer } from 'expo-sensors';
-import { sendAccelerometerBurst, savePendingAccelerometerData } from '../services/storage';
+import { savePendingAccelerometerData } from '../services/storage';
+import { sendAccelerometerBurst } from '../services/api';
 
 const READING_INTERVAL_MS = 1000;  // citire la 1 secundă
 const BURST_INTERVAL_MS = 30000;   // trimite burst la 30 secunde

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "mobile",
+    "name": "BeWell",
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,19 +9,47 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#2196F3"
     },
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "newArchEnabled": false,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#2196F3"
+      },
+      "package": "com.fona.bewell",
+      "buildProperties": {
+        "kotlinVersion": "1.9.25"
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+  [
+    "expo-build-properties",
+    {
+      "android": {
+        "kotlinVersion": "1.9.25"
+      }
+    }
+  ],
+  [
+    "react-native-ble-plx",
+    {
+      "isBackgroundEnabled": true,
+      "modes": ["peripheral", "central"],
+      "bluetoothAlwaysPermission": "Allow BeWell to connect to Bluetooth devices"
+    }
+  ]
+],
+    "extra": {
+      "eas": {
+        "projectId": "56a558e2-6167-4f0e-9761-146d7c22bc4c"
+      }
     }
   }
 }

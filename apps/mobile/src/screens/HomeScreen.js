@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import useAccelerometer from '../hooks/useAccelerometer';
 
 export default function HomeScreen() {
+  const [isOnline] = useState(true);
+  const { data: accelData, isActive } = useAccelerometer(isOnline);
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.card}>
@@ -19,6 +23,12 @@ export default function HomeScreen() {
           <Text style={styles.statusLabel}>Internet</Text>
           <Text style={styles.statusOn}>● Conectat</Text>
         </View>
+        <View style={styles.statusRow}>
+          <Text style={styles.statusLabel}>Accelerometru</Text>
+          <Text style={isActive ? styles.statusOn : styles.statusOff}>
+            {isActive ? '● Activ' : '● Inactiv'}
+          </Text>
+        </View>
       </View>
 
       <View style={styles.card}>
@@ -27,6 +37,16 @@ export default function HomeScreen() {
         <Text style={styles.measureText}>Temperatură: -- °C</Text>
         <Text style={styles.measureText}>Umiditate: -- %</Text>
         <Text style={styles.measureText}>ECG: --</Text>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>📱 Accelerometru</Text>
+        <Text style={styles.measureText}>X: {accelData.x.toFixed(4)}</Text>
+        <Text style={styles.measureText}>Y: {accelData.y.toFixed(4)}</Text>
+        <Text style={styles.measureText}>Z: {accelData.z.toFixed(4)}</Text>
+        <Text style={styles.hint}>
+          📤 Date trimise la cloud la fiecare 30s (burst)
+        </Text>
       </View>
     </ScrollView>
   );
@@ -82,5 +102,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#444',
     marginBottom: 6,
+  },
+  hint: {
+    fontSize: 12,
+    color: '#aaa',
+    marginTop: 8,
   },
 });

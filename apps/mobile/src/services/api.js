@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'http://10.234.21.79:3001'; // Android emulator -> localhost
+const API_BASE_URL = 'http://192.168.1.109:3001';; // Android emulator -> localhost
 
 const getHeaders = async () => {
   const patientId = await AsyncStorage.getItem('patient_id') || '1';

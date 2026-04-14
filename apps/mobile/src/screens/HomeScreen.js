@@ -9,6 +9,7 @@ export default function HomeScreen() {
   const {
     isScanning,
     connectedDevice,
+    foundDevices,
     sensorData,
     alerts,
     startScanning,
@@ -18,6 +19,7 @@ export default function HomeScreen() {
     { parameter: 'pulse', min: 60, max: 100 },
     { parameter: 'temperature', min: 36, max: 37.5 },
     { parameter: 'ecg', min: 60, max: 100 },
+    { parameter: 'humidity', min: 30, max: 60 },
   ]);
 
   return (
@@ -32,12 +34,14 @@ export default function HomeScreen() {
         <View style={styles.statusRow}>
           <Text style={styles.statusLabel}>Bluetooth</Text>
           <Text style={connectedDevice ? styles.statusOn : styles.statusOff}>
-            {connectedDevice ? '● Conectat' : '● Deconectat'}
+            {connectedDevice ? `● Conectat (${connectedDevice.name})` : '● Deconectat'}
           </Text>
         </View>
         <View style={styles.statusRow}>
           <Text style={styles.statusLabel}>Internet</Text>
-          <Text style={styles.statusOn}>● Conectat</Text>
+          <Text style={isOnline ? styles.statusOn : styles.statusOff}>
+            {isOnline ? '● Conectat' : '● Deconectat'}
+          </Text>
         </View>
         <View style={styles.statusRow}>
           <Text style={styles.statusLabel}>Accelerometru</Text>
@@ -65,6 +69,27 @@ export default function HomeScreen() {
             </TouchableOpacity>
           )}
         </View>
+
+        {foundDevices.length > 0 && (
+          <View style={styles.devicesContainer}>
+            <Text style={styles.devicesTitle}>Dispozitive găsite:</Text>
+            {foundDevices.map((d, i) => (
+              <Text key={i} style={styles.deviceItem}>• {d.name} ({d.id})</Text>
+            ))}
+          </View>
+        )}
+
+        {isScanning && foundDevices.length === 0 && (
+          <Text style={styles.scanningText}>
+            Căutare dispozitive BeWell în jur...
+          </Text>
+        )}
+
+        {!connectedDevice && !isScanning && (
+          <Text style={styles.demoText}>
+            Caută dispozitive Bluetooth cu numele "BeWell"
+          </Text>
+        )}
       </View>
 
       <View style={styles.card}>
@@ -204,5 +229,34 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 14,
+  },
+  devicesContainer: {
+    marginTop: 10,
+    padding: 8,
+    backgroundColor: '#E3F2FD',
+    borderRadius: 8,
+  },
+  devicesTitle: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#1565C0',
+    marginBottom: 4,
+  },
+  deviceItem: {
+    fontSize: 13,
+    color: '#2196F3',
+    marginBottom: 2,
+  },
+  scanningText: {
+    fontSize: 12,
+    color: '#FF9800',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  demoText: {
+    fontSize: 11,
+    color: '#aaa',
+    textAlign: 'center',
+    marginTop: 6,
   },
 });

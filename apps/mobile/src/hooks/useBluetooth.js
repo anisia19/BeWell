@@ -6,13 +6,11 @@ import { savePendingSensorData, savePendingAlarm } from '../services/storage';
 const READING_INTERVAL_MS = 10000;
 const SEND_INTERVAL_MS = 30000;
 
-// Nume dispozitiv BLE de căutat
-const DEVICE_NAME = 'BeWell';
-
 export default function useBluetooth(isOnline, alertRules) {
   const [isScanning, setIsScanning] = useState(false);
   const [connectedDevice, setConnectedDevice] = useState(null);
   const [bluetoothState, setBluetoothState] = useState('unknown');
+  const [foundDevices, setFoundDevices] = useState([]);
   const [sensorData, setSensorData] = useState({
     ecg: null, temperature: null, humidity: null, pulse: null,
   });
@@ -47,8 +45,8 @@ export default function useBluetooth(isOnline, alertRules) {
     try {
       const { BleManager } = require('react-native-ble-plx');
       bleManager.current = new BleManager();
-
       setIsScanning(true);
+      setFoundDevices([]);
 
       bleManager.current.onStateChange((state) => {
         setBluetoothState(state);
@@ -59,11 +57,22 @@ export default function useBluetooth(isOnline, alertRules) {
               setIsScanning(false);
               return;
             }
-            if (device?.name?.includes(DEVICE_NAME)) {
-              bleManager.current.stopDeviceScan();
-              connectToDevice(device);
+            if (device?.name) {
+              setFoundDevices(prev => {
+                if (prev.find(d => d.id === device.id)) return prev;
+                return [...prev, { id: device.id, name: device.name }];
+              });
+              if (device.name.includes('BeWell')) {
+                bleManager.current.stopDeviceScan();
+                connectToDevice(device);
+              }
             }
           });
+
+          setTimeout(() => {
+            bleManager.current.stopDeviceScan();
+            setIsScanning(false);
+          }, 10000);
         }
       }, true);
 
@@ -106,22 +115,16 @@ export default function useBluetooth(isOnline, alertRules) {
   };
 
   const startReadingData = (device) => {
-    // UUID-urile caracteristicilor BLE ale modulului inteligent
-    // Înlocuiește cu UUID-urile reale ale dispozitivului tău
     const SERVICE_UUID = '0000180D-0000-1000-8000-00805F9B34FB';
     const CHAR_UUID = '00002A37-0000-1000-8000-00805F9B34FB';
 
     readInterval.current = setInterval(async () => {
       try {
         const characteristic = await device.readCharacteristicForService(
-          SERVICE_UUID,
-          CHAR_UUID
+          SERVICE_UUID, CHAR_UUID
         );
-        
-        // Decodează datele primite (Base64 -> JSON)
         const raw = atob(characteristic.value);
         const reading = JSON.parse(raw);
-
         setSensorData(reading);
         readingsBuffer.current.push({
           ...reading,
@@ -145,7 +148,6 @@ export default function useBluetooth(isOnline, alertRules) {
             console.log('Date senzori trimise la cloud');
           } else {
             await savePendingSensorData(avg);
-            console.log('Date senzori salvate local');
           }
         } catch (error) {
           console.error('Eroare trimitere:', error);
@@ -177,26 +179,22 @@ export default function useBluetooth(isOnline, alertRules) {
       let triggered = false;
       let message = '';
 
-      if (rule.parameter === 'pulse' &&
-        reading.pulse != null &&
+      if (rule.parameter === 'pulse' && reading.pulse != null &&
         (reading.pulse < rule.min || reading.pulse > rule.max)) {
         triggered = true;
         message = `Puls anormal: ${reading.pulse.toFixed(0)} bpm (normal: ${rule.min}-${rule.max})`;
       }
-      if (rule.parameter === 'temperature' &&
-        reading.temperature != null &&
+      if (rule.parameter === 'temperature' && reading.temperature != null &&
         (reading.temperature < rule.min || reading.temperature > rule.max)) {
         triggered = true;
         message = `Temperatură anormală: ${reading.temperature.toFixed(1)}°C (normal: ${rule.min}-${rule.max})`;
       }
-      if (rule.parameter === 'ecg' &&
-        reading.ecg != null &&
+      if (rule.parameter === 'ecg' && reading.ecg != null &&
         (reading.ecg < rule.min || reading.ecg > rule.max)) {
         triggered = true;
         message = `ECG anormal: ${reading.ecg.toFixed(0)} (normal: ${rule.min}-${rule.max})`;
       }
-      if (rule.parameter === 'humidity' &&
-        reading.humidity != null &&
+      if (rule.parameter === 'humidity' && reading.humidity != null &&
         (reading.humidity < rule.min || reading.humidity > rule.max)) {
         triggered = true;
         message = `Umiditate anormală: ${reading.humidity.toFixed(0)}% (normal: ${rule.min}-${rule.max})`;
@@ -210,6 +208,10 @@ export default function useBluetooth(isOnline, alertRules) {
           triggered_at: new Date().toISOString(),
         };
         setAlerts(prev => [alarm, ...prev]);
+
+        const { sendAlertNotification } = require('../services/notifications');
+        await sendAlertNotification(alarm);
+
         try {
           const { sendAlarm } = require('../services/api');
           if (isOnline) await sendAlarm(alarm);
@@ -225,6 +227,7 @@ export default function useBluetooth(isOnline, alertRules) {
     isScanning,
     connectedDevice,
     bluetoothState,
+    foundDevices,
     sensorData,
     alerts,
     startScanning,

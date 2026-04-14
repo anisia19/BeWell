@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'https://bewell-dxk6.onrender.com';
+const API_BASE_URL = 'http://192.168.1.109:3001';
 
 const getHeaders = async () => {
   const token = await AsyncStorage.getItem('token');

@@ -1,9 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'http://192.168.1.109:3001';; // Android emulator -> localhost
+const API_BASE_URL = 'https://bewell-dxk6.onrender.com';
 
 const getHeaders = async () => {
-  const patientId = await AsyncStorage.getItem('patient_id') || '1';
   const token = await AsyncStorage.getItem('token');
   return {
     'Content-Type': 'application/json',
@@ -15,8 +14,6 @@ const handleResponse = async (res) => {
   if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
   return res.json();
 };
-
-
 
 export const login = async (email, password) => {
   const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
@@ -37,6 +34,15 @@ export const logout = async () => {
   await AsyncStorage.removeItem('patient_id');
 };
 
+export const getPatientProfile = async () => {
+  const patientId = await AsyncStorage.getItem('patient_id') || '1';
+  const headers = await getHeaders();
+  const res = await fetch(
+    `${API_BASE_URL}/api/patients/${patientId}`,
+    { headers }
+  );
+  return handleResponse(res);
+};
 
 export const getActivities = async () => {
   const patientId = await AsyncStorage.getItem('patient_id') || '1';
@@ -48,9 +54,8 @@ export const getActivities = async () => {
   return handleResponse(res);
 };
 
-
 export const getRecommendations = async () => {
- const patientId = await AsyncStorage.getItem('patient_id') || '1';
+  const patientId = await AsyncStorage.getItem('patient_id') || '1';
   const headers = await getHeaders();
   const res = await fetch(
     `${API_BASE_URL}/api/recommendations/${patientId}`,
@@ -58,8 +63,6 @@ export const getRecommendations = async () => {
   );
   return handleResponse(res);
 };
-
-
 
 export const getAlerts = async () => {
   const patientId = await AsyncStorage.getItem('patient_id') || '1';
@@ -80,8 +83,6 @@ export const sendAlertNote = async (alertId, note) => {
   });
   return handleResponse(res);
 };
-
-
 
 export const sendSensorData = async (data) => {
   const patientId = await AsyncStorage.getItem('patient_id') || '1';
@@ -106,7 +107,7 @@ export const sendAccelerometerBurst = async (readings) => {
 };
 
 export const sendAlarm = async (alarmData) => {
- const patientId = await AsyncStorage.getItem('patient_id') || '1';
+  const patientId = await AsyncStorage.getItem('patient_id') || '1';
   const headers = await getHeaders();
   const res = await fetch(`${API_BASE_URL}/api/alerts`, {
     method: 'POST',

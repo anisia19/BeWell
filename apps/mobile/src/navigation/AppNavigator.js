@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text } from 'react-native';
+import { Text, TouchableOpacity } from 'react-native';
 
 import HomeScreen from '../screens/HomeScreen';
 import ActivitiesScreen from '../screens/ActivitiesScreen';
@@ -11,7 +11,7 @@ import ChartsScreen from '../screens/ChartsScreen';
 
 const Tab = createBottomTabNavigator();
 
-export default function AppNavigator() {
+export default function AppNavigator({ onLogout }) {
   return (
     <NavigationContainer>
       <Tab.Navigator
@@ -20,6 +20,11 @@ export default function AppNavigator() {
           tabBarInactiveTintColor: 'gray',
           headerStyle: { backgroundColor: '#2196F3' },
           headerTintColor: '#fff',
+          headerRight: () => (
+            <TouchableOpacity onPress={onLogout} style={{ marginRight: 16 }}>
+              <Text style={{ color: '#fff', fontSize: 14 }}>Ieșire</Text>
+            </TouchableOpacity>
+          ),
         }}
       >
         <Tab.Screen

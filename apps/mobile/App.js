@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppNavigator from './src/navigation/AppNavigator';
+import LoginScreen from './src/screens/LoginScreen';
 import { syncPendingData } from './src/services/storage';
 import {
   requestNotificationPermissions,
@@ -11,11 +13,37 @@ import {
 
 export default function App() {
   const [isOnline, setIsOnline] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    // Cere permisiuni notificări la startup
     requestNotificationPermissions();
+    checkLoginStatus();
   }, []);
+
+  const checkLoginStatus = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const patientId = await AsyncStorage.getItem('patient_id');
+      if (token && patientId) {
+        setIsLoggedIn(true);
+      }
+    } catch (error) {
+      console.error('Eroare verificare auth:', error);
+    } finally {
+      setCheckingAuth(false);
+    }
+  };
+
+  const handleLogin = async (data) => {
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem('patient_id');
+    setIsLoggedIn(false);
+  };
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(async (state) => {
@@ -41,6 +69,14 @@ export default function App() {
     return () => unsubscribe();
   }, [isOnline]);
 
+  if (checkingAuth) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.loadingText}>Se încarcă...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {!isOnline && (
@@ -50,7 +86,11 @@ export default function App() {
           </Text>
         </View>
       )}
-      <AppNavigator />
+      {isLoggedIn ? (
+        <AppNavigator onLogout={handleLogout} />
+      ) : (
+        <LoginScreen onLogin={handleLogin} />
+      )}
     </View>
   );
 }
@@ -58,6 +98,15 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#888',
   },
   offlineBanner: {
     backgroundColor: '#FF9800',

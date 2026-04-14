@@ -5,6 +5,7 @@ import accelerometerRoutes from './routes/accelerometerRoutes.js';
 import sensorRoutes from './routes/sensorRoutes.js';
 import alertRoutes from './routes/alertRoutes.js';
 import recommendationRoutes from './routes/recommendationRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'API works ✅' });
 });
 
+app.use('/api/auth', authRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/accelerometer-readings', accelerometerRoutes);
 app.use('/api/sensor-readings', sensorRoutes);

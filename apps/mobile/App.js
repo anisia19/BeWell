@@ -3,23 +3,43 @@ import { View, Text, StyleSheet } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import AppNavigator from './src/navigation/AppNavigator';
 import { syncPendingData } from './src/services/storage';
+import {
+  requestNotificationPermissions,
+  sendOfflineNotification,
+  sendSyncNotification,
+} from './src/services/notifications';
 
 export default function App() {
   const [isOnline, setIsOnline] = useState(true);
 
   useEffect(() => {
+    // Cere permisiuni notificări la startup
+    requestNotificationPermissions();
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(async (state) => {
       const online = state.isConnected && state.isInternetReachable;
-      setIsOnline(online);
 
-      if (online) {
-        console.log('Internet restaurat — sincronizare date pending...');
-        await syncPendingData();
+      if (!online && isOnline) {
+        await sendOfflineNotification();
       }
+
+      if (online && !isOnline) {
+        console.log('Internet restaurat — sincronizare date pending...');
+        try {
+          await syncPendingData();
+          await sendSyncNotification(1);
+        } catch (error) {
+          console.error('Eroare sincronizare:', error);
+        }
+      }
+
+      setIsOnline(online);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [isOnline]);
 
   return (
     <View style={styles.container}>

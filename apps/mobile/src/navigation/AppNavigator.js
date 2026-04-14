@@ -7,6 +7,7 @@ import HomeScreen from '../screens/HomeScreen';
 import ActivitiesScreen from '../screens/ActivitiesScreen';
 import RecommendationsScreen from '../screens/RecommendationsScreen';
 import AlertsScreen from '../screens/AlertsScreen';
+import ChartsScreen from '../screens/ChartsScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -35,6 +36,11 @@ export default function AppNavigator() {
           name="Recomandări"
           component={RecommendationsScreen}
           options={{ tabBarIcon: () => <Text>💊</Text> }}
+        />
+        <Tab.Screen
+          name="Grafice"
+          component={ChartsScreen}
+          options={{ tabBarIcon: () => <Text>📈</Text> }}
         />
         <Tab.Screen
           name="Alerte"

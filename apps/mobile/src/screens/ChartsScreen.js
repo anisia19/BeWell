@@ -16,7 +16,7 @@ const chartConfig = {
   propsForDots: { r: '4', strokeWidth: '2', stroke: '#2196F3' },
 };
 
-const API_BASE_URL = 'http://192.168.1.109:3001';
+const API_BASE_URL = 'http://10.234.21.79:3001';
 
 export default function ChartsScreen() {
   const [loading, setLoading] = useState(true);

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppNavigator from './src/navigation/AppNavigator';
@@ -35,7 +36,7 @@ export default function App() {
     }
   };
 
-  const handleLogin = async (data) => {
+  const handleLogin = async () => {
     setIsLoggedIn(true);
   };
 
@@ -54,7 +55,6 @@ export default function App() {
       }
 
       if (online && !isOnline) {
-        console.log('Internet restaurat — sincronizare date pending...');
         try {
           await syncPendingData();
           await sendSyncNotification(1);
@@ -72,6 +72,7 @@ export default function App() {
   if (checkingAuth) {
     return (
       <View style={styles.centered}>
+        <StatusBar style="light" backgroundColor="#000000" />
         <Text style={styles.loadingText}>Se încarcă...</Text>
       </View>
     );
@@ -79,10 +80,11 @@ export default function App() {
 
   return (
     <View style={styles.container}>
+      <StatusBar style="light" backgroundColor="#000000" />
       {!isOnline && (
         <View style={styles.offlineBanner}>
           <Text style={styles.offlineText}>
-            ⚠️ Offline — datele se salvează local
+            Offline — datele se salvează local
           </Text>
         </View>
       )}
@@ -96,26 +98,9 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#888',
-  },
-  offlineBanner: {
-    backgroundColor: '#FF9800',
-    padding: 8,
-    alignItems: 'center',
-  },
-  offlineText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 13,
-  },
+  container: { flex: 1, backgroundColor: '#0D1117' },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D1117' },
+  loadingText: { fontSize: 16, color: '#6B7280' },
+  offlineBanner: { backgroundColor: '#7C2D12', padding: 8, alignItems: 'center' },
+  offlineText: { color: '#FED7AA', fontWeight: '500', fontSize: 13 },
 });

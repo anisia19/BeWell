@@ -1,4 +1,5 @@
 import express from 'express';
+import bcrypt from 'bcryptjs';
 import db from '../config/db.js';
 
 const router = express.Router();
@@ -22,7 +23,8 @@ router.post('/login', async (req, res) => {
 
     const user = users[0];
 
-    if (user.password_hash !== password) {
+    const isValid = await bcrypt.compare(password, user.password_hash);
+    if (!isValid) {
       return res.status(401).json({ error: 'Email sau parola incorecte' });
     }
 
@@ -65,7 +67,6 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'CNP-ul trebuie sa aiba 13 cifre' });
     }
 
-    // Verifică dacă emailul există deja
     const [existing] = await db.query(
       'SELECT * FROM users WHERE email = ?',
       [email]
@@ -75,16 +76,16 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ error: 'Email-ul este deja inregistrat' });
     }
 
-    // Creează userul
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const [userResult] = await db.query(
       `INSERT INTO users (email, password_hash, role, first_name, last_name, phone, is_active) 
        VALUES (?, ?, 'PATIENT', ?, ?, ?, 1)`,
-      [email, password, first_name, last_name, phone]
+      [email, hashedPassword, first_name, last_name, phone]
     );
 
     const userId = userResult.insertId;
 
-    // Creează pacientul
     const [patientResult] = await db.query(
       `INSERT INTO patients (user_id, cnp) VALUES (?, ?)`,
       [userId, cnp]
@@ -103,6 +104,30 @@ router.post('/register', async (req, res) => {
 
   } catch (error) {
     console.error('Eroare register:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/auth/migrate-passwords
+router.post('/migrate-passwords', async (req, res) => {
+  try {
+    const [users] = await db.query('SELECT id, password_hash FROM users');
+    let migrated = 0;
+
+    for (const user of users) {
+      if (!user.password_hash.startsWith('$2')) {
+        const hashed = await bcrypt.hash(user.password_hash, 10);
+        await db.query(
+          'UPDATE users SET password_hash = ? WHERE id = ?',
+          [hashed, user.id]
+        );
+        migrated++;
+      }
+    }
+
+    res.json({ success: true, migrated, message: `${migrated} parole hash-uite cu succes` });
+  } catch (error) {
+    console.error('Eroare migrare:', error);
     res.status(500).json({ error: error.message });
   }
 });

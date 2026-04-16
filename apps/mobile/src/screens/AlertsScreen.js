@@ -44,17 +44,20 @@ export default function AlertsScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#F44336" />
+        <ActivityIndicator size="large" color="#6EE7B7" />
       </View>
     );
   }
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>🔔 Alerte și avertizări</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerSub}>Monitorizare activă</Text>
+        <Text style={styles.headerTitle}>Alerte și avertizări</Text>
+      </View>
 
       {alerts.length === 0 ? (
-        <View style={styles.card}>
+        <View style={styles.emptyCard}>
           <Text style={styles.emptyText}>Nu există alerte active.</Text>
         </View>
       ) : (
@@ -64,22 +67,30 @@ export default function AlertsScreen() {
             style={[
               styles.card,
               selectedAlert?.id === alert.id && styles.cardSelected,
+              alert.severity === 'HIGH' && styles.cardHigh,
+              alert.severity === 'MEDIUM' && styles.cardMedium,
             ]}
             onPress={() => setSelectedAlert(alert)}
           >
             <View style={styles.alertHeader}>
               <Text style={styles.alertType}>{alert.alert_type}</Text>
-              <Text style={[
-                styles.alertSeverity,
-                alert.severity === 'HIGH' ? styles.high :
-                alert.severity === 'MEDIUM' ? styles.medium : styles.low
+              <View style={[
+                styles.severityBadge,
+                alert.severity === 'HIGH' ? styles.badgeHigh :
+                alert.severity === 'MEDIUM' ? styles.badgeMedium : styles.badgeLow
               ]}>
-                {alert.severity}
-              </Text>
+                <Text style={[
+                  styles.severityText,
+                  alert.severity === 'HIGH' ? styles.textHigh :
+                  alert.severity === 'MEDIUM' ? styles.textMedium : styles.textLow
+                ]}>
+                  {alert.severity}
+                </Text>
+              </View>
             </View>
             <Text style={styles.alertMessage}>{alert.message}</Text>
             <Text style={styles.alertDate}>
-              🕐 {new Date(alert.triggered_at).toLocaleString('ro-RO')}
+              {new Date(alert.triggered_at).toLocaleString('ro-RO')}
             </Text>
           </TouchableOpacity>
         ))
@@ -87,12 +98,11 @@ export default function AlertsScreen() {
 
       {selectedAlert && (
         <View style={styles.noteCard}>
-          <Text style={styles.noteTitle}>
-            📝 Adaugă notă pentru alerta selectată
-          </Text>
+          <Text style={styles.noteTitle}>Adaugă notă pentru alerta selectată</Text>
           <TextInput
             style={styles.noteInput}
-            placeholder="Introdu o notă asociată alertei..."
+            placeholder="Introduceți o notă..."
+            placeholderTextColor="#4B5563"
             value={noteText}
             onChangeText={setNoteText}
             multiline
@@ -107,108 +117,32 @@ export default function AlertsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f0f4f8',
-    padding: 16,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#F44336',
-    marginBottom: 16,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    elevation: 3,
-  },
-  cardSelected: {
-    borderWidth: 2,
-    borderColor: '#2196F3',
-  },
-  alertHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  alertType: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  alertSeverity: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  high: {
-    backgroundColor: '#FFEBEE',
-    color: '#F44336',
-  },
-  medium: {
-    backgroundColor: '#FFF3E0',
-    color: '#FF9800',
-  },
-  low: {
-    backgroundColor: '#E8F5E9',
-    color: '#4CAF50',
-  },
-  alertMessage: {
-    fontSize: 14,
-    color: '#555',
-    marginBottom: 6,
-  },
-  alertDate: {
-    fontSize: 12,
-    color: '#aaa',
-  },
-  noteCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    elevation: 3,
-  },
-  noteTitle: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  noteInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 14,
-    minHeight: 80,
-    textAlignVertical: 'top',
-    marginBottom: 10,
-  },
-  sendButton: {
-    backgroundColor: '#2196F3',
-    borderRadius: 8,
-    padding: 12,
-    alignItems: 'center',
-  },
-  sendButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 15,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: '#888',
-    textAlign: 'center',
-  },
+  container: { flex: 1, backgroundColor: '#0D1117' },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D1117' },
+  header: { backgroundColor: '#1A3A2A', padding: 20, paddingTop: 52, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, marginBottom: 12 },
+  headerSub: { fontSize: 12, color: '#6EE7B7' },
+  headerTitle: { fontSize: 20, fontWeight: '500', color: 'white', marginTop: 4 },
+  card: { backgroundColor: '#161B22', borderRadius: 16, padding: 14, marginHorizontal: 12, marginBottom: 10, borderWidth: 0.5, borderColor: '#21262D' },
+  cardSelected: { borderColor: '#6EE7B7' },
+  cardHigh: { backgroundColor: '#1A0A0A', borderColor: '#6E3535' },
+  cardMedium: { backgroundColor: '#1A1200', borderColor: '#6E4C00' },
+  emptyCard: { backgroundColor: '#161B22', borderRadius: 16, padding: 20, marginHorizontal: 12, alignItems: 'center', borderWidth: 0.5, borderColor: '#21262D' },
+  emptyText: { fontSize: 14, color: '#6B7280' },
+  alertHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+  alertType: { fontSize: 14, fontWeight: '500', color: 'white' },
+  severityBadge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
+  badgeHigh: { backgroundColor: '#450A0A' },
+  badgeMedium: { backgroundColor: '#3D2000' },
+  badgeLow: { backgroundColor: '#064E3B' },
+  severityText: { fontSize: 11, fontWeight: '500' },
+  textHigh: { color: '#FCA5A5' },
+  textMedium: { color: '#FCD34D' },
+  textLow: { color: '#6EE7B7' },
+  alertMessage: { fontSize: 13, color: '#8B949E', marginBottom: 6 },
+  alertDate: { fontSize: 11, color: '#4B5563' },
+  noteCard: { backgroundColor: '#161B22', borderRadius: 16, padding: 14, marginHorizontal: 12, marginBottom: 10, borderWidth: 0.5, borderColor: '#21262D' },
+  noteTitle: { fontSize: 13, fontWeight: '500', color: '#6EE7B7', marginBottom: 10 },
+  noteInput: { borderWidth: 0.5, borderColor: '#21262D', borderRadius: 10, padding: 10, fontSize: 13, minHeight: 80, textAlignVertical: 'top', marginBottom: 10, color: 'white', backgroundColor: '#0D1117' },
+  sendButton: { backgroundColor: '#064E3B', borderRadius: 10, padding: 12, alignItems: 'center' },
+  sendButtonText: { color: '#6EE7B7', fontWeight: '500', fontSize: 14 },
 });

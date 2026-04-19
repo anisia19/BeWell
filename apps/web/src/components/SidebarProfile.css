@@ -1,0 +1,46 @@
+.sidebar-profile {
+    width: 100%;
+    padding-top: 16px;
+}
+
+.sidebar-profile-divider {
+    width: calc(100% + 32px);
+    height: 1px;
+    margin-left: -16px;
+    margin-bottom: 16px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-profile-name {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.sidebar-profile-role {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.sidebar-profile-logout {
+    width: 100%;
+    justify-content: flex-start !important;
+    color: #cbd5e1 !important;
+    font-size: 14px !important;
+    padding-left: 0 !important;
+}
+
+.sidebar-profile-logout:hover {
+    background: transparent !important;
+    color: white !important;
+}
+
+.sidebar-icon {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+.logout-icon {
+    padding-right: 6px;
+    font-size: 16px;
+}

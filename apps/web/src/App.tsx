@@ -11,6 +11,7 @@ import Recommendations from "./pages/Recommendations";
 import Login from "./pages/Login";
 import Welcome from "./pages/Welcome";
 import RegisterPage from "./pages/RegisterPage";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 function App() {
   return (

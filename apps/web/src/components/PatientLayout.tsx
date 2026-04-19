@@ -1,20 +1,26 @@
-import { Grid, GridItem, Text, VStack } from "@chakra-ui/react";
+import { Grid, GridItem, Text, VStack, Stack } from "@chakra-ui/react";
 import { NavLink, Outlet } from "react-router-dom";
 import "./Layout.css";
+import SideBarProfile from "./SideBarProfile";
 
 const PatientLayout = () => {
   return (
     <Grid templateColumns="250px 1fr" minH="100vh">
       <GridItem className="sidebar" p={4}>
-        <Text fontWeight="bold" mb={4} fontSize="xl">
-          BeWell
-        </Text>
+        <Stack h="100%" justify="space-between">
+          <div>
+            <Text fontWeight="bold" mb={4} fontSize="xl">
+              BeWell
+            </Text>
 
-        <VStack align="start" spacing={3}>
-          <NavLink to="/patient/dashboard">Dashboard</NavLink>
-          <NavLink to="/patient/alerts">Alerts</NavLink>
-          <NavLink to="/patient/recommendations">Recommendations</NavLink>
-        </VStack>
+            <VStack align="start" spacing={3}>
+              <NavLink to="/patient/dashboard">Dashboard</NavLink>
+              <NavLink to="/patient/alerts">Alerts</NavLink>
+              <NavLink to="/patient/recommendations">Recommendations</NavLink>
+            </VStack>
+          </div>
+          <SideBarProfile />
+        </Stack>
       </GridItem>
 
       <GridItem bg="gray.50" p={6}>

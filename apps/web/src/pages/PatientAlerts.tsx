@@ -1,4 +1,4 @@
-import React from "react";
+import "../index.css";
 
 const PatientAlerts = () => {
   return <div>PatientAlerts</div>;

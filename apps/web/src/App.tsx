@@ -1,26 +1,20 @@
-import { useEffect, useState } from "react";
+import { Grid, GridItem, Text } from "@chakra-ui/react";
+import "./App.css";
 
 function App() {
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    fetch("http://localhost:3001/health")
-      .then((res) => res.json())
-      .then((data) => setMessage(data.status));
-  }, []);
-
-  useEffect(() => {
-    fetch("http://localhost:3001/api/patients")
-      .then((res) => res.json())
-      .then((data) => console.log(data))
-      .catch((err) => console.error(err));
-  }, []);
-
   return (
-    <div>
-      <h1>Web App</h1>
-      <p>{message}</p>
-    </div>
+    <Grid templateColumns="250px 1fr" minH="100vh">
+      <GridItem className="sidebar">
+        <Text fontWeight="bold" mb={2}>
+          BeWell
+        </Text>
+      </GridItem>
+      <GridItem bg="gray.50" p={6}>
+        <Text fontWeight="bold" mb={2}>
+          Main Content
+        </Text>
+      </GridItem>
+    </Grid>
   );
 }
 

@@ -1,20 +1,21 @@
-import { Grid, GridItem, Text } from "@chakra-ui/react";
-import "./App.css";
+import { Routes, Route } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
+import Patients from "./pages/Patients";
+import Login from "./pages/Login";
+import HomePageDoctor from "./pages/HomePageDoctor";
+import Layout from "./components/Layout";
 
 function App() {
   return (
-    <Grid templateColumns="250px 1fr" minH="100vh">
-      <GridItem className="sidebar">
-        <Text fontWeight="bold" mb={2}>
-          BeWell
-        </Text>
-      </GridItem>
-      <GridItem bg="gray.50" p={6}>
-        <Text fontWeight="bold" mb={2}>
-          Main Content
-        </Text>
-      </GridItem>
-    </Grid>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Dashboard />} />
+        <Route path="patients" element={<Patients />} />
+        <Route path="doctor" element={<HomePageDoctor />} />
+      </Route>
+    </Routes>
   );
 }
 

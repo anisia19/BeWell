@@ -1,10 +1,11 @@
 import { Grid, GridItem, Text, VStack } from "@chakra-ui/react";
 import { Link, Outlet } from "react-router-dom";
+import "./Layout.css";
 
 function Layout() {
   return (
     <Grid templateColumns="250px 1fr" minH="100vh">
-      <GridItem bg="teal.500" color="white" p={4}>
+      <GridItem className="sidebar" p={4}>
         <Text fontWeight="bold" mb={4} fontSize="xl">
           BeWell
         </Text>

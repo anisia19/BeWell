@@ -1,0 +1,20 @@
+.welcome-container {
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 32px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    background: white;
+    text-align: center;
+}
+
+.welcome-text {
+    color: #4a5568;
+}
+
+.welcome-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}

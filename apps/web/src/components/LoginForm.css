@@ -1,0 +1,138 @@
+/* LoginForm.css */
+
+/* 1. BACKGROUND GRADIENT (Apply to html to prevent centering bugs) */
+html {
+  background: radial-gradient(circle at center, #052e16 0%, #000000 100%) no-repeat fixed !important;
+  background-color: #000000; /* Fallback */
+  height: 100%;
+}
+
+/* 2. CENTERING LOGIC */
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;    /* Horizontal Center */
+  justify-content: center; /* Vertical Center */
+  min-height: 100vh;
+  width: 100%;
+  /* Make body transparent so the html gradient shows through */
+  background: transparent !important; 
+}
+
+/* 3. HEADINGS */
+h1 {
+  color: #ffffff;
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  text-align: center;
+  letter-spacing: -1px;
+}
+
+h2 {
+  color: #14532d; 
+  font-size: 1.3rem;
+  font-weight: 400;
+  margin: 0 0 40px 0;
+  text-align: center;
+}
+
+/* 4. THE FORM CONTAINER */
+form {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+form > div {
+  background: #111111 !important;
+  padding: 3.5rem !important; 
+  border-radius: 24px !important;
+  border: 2px solid #064e3b !important; 
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8) !important;
+  
+  width: 600px !important; 
+  max-width: 90vw !important;
+}
+
+/* 5. LABELS */
+label {
+  color: #14532d !important; 
+  font-weight: 700 !important;
+  font-size: 1.2rem !important; 
+  margin-bottom: 12px !important;
+}
+
+/* 6. INPUTS (No-Flash Black Background) */
+input, 
+input.chakra-input {
+  background-color: #000000 !important; 
+  border: 2px solid #14532d !important; 
+  color: white !important;
+  height: 65px !important;    
+  font-size: 1.2rem !important; 
+  border-radius: 14px !important;
+  padding: 0 20px !important;
+  width: 100% !important;
+  transition: background-color 0s !important;
+}
+
+/* Text selection color */
+input::selection {
+  background-color: #14532d !important;
+  color: white !important;
+}
+
+/* Focus and Active states */
+input:focus, 
+input:active,
+input:hover {
+  background-color: #000000 !important;
+  border-color: #166534 !important;
+  box-shadow: 0 0 10px rgba(22, 101, 52, 0.5) !important;
+  outline: none !important;
+}
+
+/* Keep black background even if field is invalid */
+input[aria-invalid="true"], 
+input[data-invalid] {
+  background-color: #000000 !important;
+  border-color: #fb7185 !important;
+}
+
+/* 7. AUTOFILL FIX */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #000000 inset !important;
+  -webkit-text-fill-color: white !important;
+  transition: background-color 5000000s ease-in-out 0s !important;
+}
+
+/* 8. SUBMIT BUTTON */
+button[type="submit"] {
+  background-color: #14532d !important;
+  color: white !important;
+  height: 65px !important;
+  font-size: 1.4rem !important;
+  font-weight: 800 !important;
+  margin-top: 30px !important;
+  border-radius: 14px !important;
+  width: 100% !important; 
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none !important;
+}
+
+button[type="submit"]:hover {
+  background-color: #166534 !important;
+  transform: translateY(-2px);
+}
+
+.chakra-form__error-message {
+  color: #fb7185 !important;
+  font-size: 0.95rem !important;
+}

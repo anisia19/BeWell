@@ -11,6 +11,7 @@ type Patient = {
   diagnosis: string | null;
   status: string;
   alertsCount: number | null;
+  cnp: string;
 };
 
 type Alert = {
@@ -88,6 +89,7 @@ function DoctorAlerts() {
           <div className="alerts-patient-list">
             {patients.map((p) => (
               <PatientCard
+                cnp={p.cnp}
                 key={p.id}
                 name={p.name}
                 gender={p.gender}

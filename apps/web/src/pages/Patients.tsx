@@ -13,6 +13,7 @@ type Patient = {
   age: number | string | null;
   diagnosis: string | null;
   status: string;
+  cnp: string;
 };
 
 function Patients() {
@@ -68,6 +69,7 @@ function Patients() {
       <div className="patients-list-cards">
         {patients.map((p) => (
           <PatientCard
+            cnp={p.cnp}
             variant="default"
             key={p.id}
             name={p.name}

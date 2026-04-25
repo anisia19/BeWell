@@ -18,6 +18,7 @@ type PatientCardProps = {
   status: string;
   alertsCount?: number;
   variant?: "default" | "compact";
+  cnp: string;
   onClick?: () => void;
 };
 
@@ -29,6 +30,7 @@ function PatientCard({
   status,
   alertsCount = 0,
   variant = "default",
+  cnp,
   onClick,
 }: PatientCardProps) {
   return (
@@ -65,7 +67,14 @@ function PatientCard({
                   variant === "compact" ? "small" : ""
                 }`}
               >
-                Age {age} · {diagnosis}
+                CNP {cnp}
+              </Text>
+              <Text
+                className={`patient-info ${
+                  variant === "compact" ? "small" : ""
+                }`}
+              >
+                AGE {age} · {diagnosis}
               </Text>
             </Box>
           </HStack>

@@ -1,16 +1,10 @@
 import { useEffect, useState } from "react";
-import {
-  Heading,
-  Text,
-  Button,
-  Input,
-  InputGroup,
-  InputLeftElement,
-} from "@chakra-ui/react";
+import { Heading, Text, Button } from "@chakra-ui/react";
 import "../index.css";
 import "./Patients.css";
 import PatientCard from "../components/PatientCard";
 import { useNavigate } from "react-router-dom";
+import SearchBar from "../components/SearchBar";
 
 type Patient = {
   id: number;
@@ -24,6 +18,7 @@ type Patient = {
 function Patients() {
   const navigate = useNavigate();
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetch("http://localhost:3001/api/patients")
@@ -33,6 +28,16 @@ function Patients() {
       })
       .catch((err) => console.error("Error fetching patients:", err));
   }, []);
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      fetch(`http://localhost:3001/api/patients?search=${search}`)
+        .then((res) => res.json())
+        .then((data) => setPatients(data));
+    }, 300);
+
+    return () => clearTimeout(delay);
+  }, [search]);
 
   return (
     <>
@@ -53,12 +58,12 @@ function Patients() {
         <Text fontSize="xs">{patients.length} total patients</Text>
       </div>
       <div className="search-bar-patients">
-        <InputGroup>
-          <InputLeftElement pointerEvents="none">
-            <i className="bi bi-search"></i>
-          </InputLeftElement>
-          <Input placeholder="Search patients..." />
-        </InputGroup>
+        <SearchBar
+          className="search-bar-patients"
+          placeholder="Search patients..."
+          value={search}
+          onChange={setSearch}
+        />
       </div>
       <div className="patients-list-cards">
         {patients.map((p) => (

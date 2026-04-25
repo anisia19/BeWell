@@ -1,6 +1,7 @@
 import "./DoctorAlerts.css";
 import PatientCard from "../components/PatientCard";
 import { useEffect, useState } from "react";
+import SearchBar from "../components/SearchBar";
 
 type Patient = {
   id: number;
@@ -45,13 +46,23 @@ const mockedAlerts: Record<number, Alert[]> = {
 function DoctorAlerts() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-
+  const [search, setSearch] = useState("");
   useEffect(() => {
     fetch("http://localhost:3001/api/patients")
       .then((res) => res.json())
       .then((data) => setPatients(data))
       .catch((err) => console.error("Error fetching patients:", err));
   }, []);
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      fetch(`http://localhost:3001/api/patients?search=${search}`)
+        .then((res) => res.json())
+        .then((data) => setPatients(data));
+    }, 300);
+
+    return () => clearTimeout(delay);
+  }, [search]);
 
   const selectedAlerts = selectedPatient
     ? mockedAlerts[selectedPatient.id] || []
@@ -63,6 +74,12 @@ function DoctorAlerts() {
 
       <div className="alerts-layout">
         <aside className="alerts-sidebar">
+          <SearchBar
+            className="search-bar-patients"
+            placeholder="Search patients..."
+            value={search}
+            onChange={setSearch}
+          />
           <div className="alerts-sidebar-header">
             <span>Patients</span>
             <span className="patients-count">{patients.length}</span>

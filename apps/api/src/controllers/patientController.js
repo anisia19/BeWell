@@ -2,70 +2,44 @@ import pool from '../config/db.js';
 
 export async function getAllPatients(req, res) {
     try {
+        const search = req.query.search;
+
         const [rows] = await pool.query(`
-        SELECT
-          p.id,
-          p.user_id,
-          CONCAT(u.first_name, ' ', u.last_name) AS name,
-          u.first_name,
-          u.last_name,
-          u.email,
-          u.phone,
-          p.cnp,
-          p.date_of_birth,
-          p.age,
-          p.gender,
-          p.profession,
-          p.workplace,
-          pa.country,
-          pa.county,
-          pa.city,
-          pa.street,
-          pa.street_number,
-          pa.building,
-          pa.apartment,
-          pa.postal_code,
-          pmp.medical_history,
-          pmp.allergies,
-          CONCAT_WS(', ', pmp.medical_history, pmp.allergies) AS diagnosis,
-      
-          COUNT(a.id) AS alertsCount
-      
-        FROM patients p
-        JOIN users u ON p.user_id = u.id
-        LEFT JOIN patient_addresses pa ON pa.patient_id = p.id
-        LEFT JOIN patient_medical_profiles pmp ON pmp.patient_id = p.id
-        LEFT JOIN alerts a 
-          ON a.patient_id = p.id
-          AND a.status = 'ACTIVE'
-      
-        GROUP BY
-          p.id,
-          p.user_id,
-          u.first_name,
-          u.last_name,
-          u.email,
-          u.phone,
-          p.cnp,
-          p.date_of_birth,
-          p.age,
-          p.gender,
-          p.profession,
-          p.workplace,
-          pa.country,
-          pa.county,
-          pa.city,
-          pa.street,
-          pa.street_number,
-          pa.building,
-          pa.apartment,
-          pa.postal_code,
-          pmp.medical_history,
-          pmp.allergies
-      
-        ORDER BY p.id
-      `);
-        console.log("patients rows:", rows);
+          SELECT
+            p.id,
+            p.user_id,
+            CONCAT(u.first_name, ' ', u.last_name) AS name,
+            u.first_name,
+            u.last_name,
+            u.email,
+            u.phone,
+            p.cnp,
+            p.age,
+            p.gender,
+            CONCAT_WS(', ', pmp.medical_history, pmp.allergies) AS diagnosis,
+            COUNT(a.id) AS alertsCount,
+            CASE 
+              WHEN u.is_active = 1 THEN 'Active'
+              ELSE 'Inactive'
+            END AS status
+        
+          FROM patients p
+          JOIN users u ON p.user_id = u.id
+          LEFT JOIN patient_medical_profiles pmp ON pmp.patient_id = p.id
+          LEFT JOIN alerts a 
+            ON a.patient_id = p.id
+            AND a.status = 'ACTIVE'
+        
+          WHERE u.role = 'PATIENT'
+            AND (
+              ? IS NULL OR
+              u.first_name LIKE CONCAT('%', ?, '%') OR
+              u.last_name LIKE CONCAT('%', ?, '%') OR
+              p.cnp LIKE CONCAT('%', ?, '%')
+            )
+        
+          GROUP BY p.id
+        `, [search, search, search, search]);
         res.json(rows);
     } catch (error) {
         console.error('GET /api/patients error:', error);

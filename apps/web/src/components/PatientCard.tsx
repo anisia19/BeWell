@@ -13,7 +13,7 @@ import "./PatientCard.css";
 type PatientCardProps = {
   name: string;
   gender: string;
-  age: number;
+  age: number | string;
   diagnosis: string;
   status: string;
   initials?: string;

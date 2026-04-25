@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Heading,
   Text,
@@ -9,11 +10,30 @@ import {
 import "../index.css";
 import "./Patients.css";
 import PatientCard from "../components/PatientCard";
-import { mockPatients } from "../data/mockPatients";
 import { useNavigate } from "react-router-dom";
+
+type Patient = {
+  id: number;
+  name: string;
+  gender: string;
+  age: number | string | null;
+  diagnosis: string | null;
+  status: string;
+};
 
 function Patients() {
   const navigate = useNavigate();
+  const [patients, setPatients] = useState<Patient[]>([]);
+
+  useEffect(() => {
+    fetch("http://localhost:3001/api/patients")
+      .then((res) => res.json())
+      .then((data) => {
+        setPatients(data);
+      })
+      .catch((err) => console.error("Error fetching patients:", err));
+  }, []);
+
   return (
     <>
       <div className="patients-page">
@@ -30,7 +50,7 @@ function Patients() {
             Add Patient
           </Button>
         </div>
-        <Text fontSize="xs">X total patients</Text>
+        <Text fontSize="xs">{patients.length} total patients</Text>
       </div>
       <div className="search-bar-patients">
         <InputGroup>
@@ -41,13 +61,13 @@ function Patients() {
         </InputGroup>
       </div>
       <div className="patients-list-cards">
-        {mockPatients.map((p) => (
+        {patients.map((p) => (
           <PatientCard
             key={p.id}
             name={p.name}
             gender={p.gender}
-            age={p.age}
-            diagnosis={p.diagnosis}
+            age={p.age ?? "N/A"}
+            diagnosis={p.diagnosis || "No medical info added"}
             status={p.status}
             onClick={() => navigate(`/doctor/patient-details/${p.id}`)}
           />

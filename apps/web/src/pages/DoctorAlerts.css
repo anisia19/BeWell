@@ -1,0 +1,90 @@
+.alerts-page {
+    min-height: 100vh;
+    background: #eef7f9;
+    padding: 28px;
+}
+
+.alerts-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 28px;
+    color: #111827;
+}
+
+.alerts-layout {
+    display: grid;
+    grid-template-columns: 390px 1fr;
+    min-height: calc(100vh - 120px);
+}
+
+.alerts-sidebar {
+    padding-right: 28px;
+}
+
+.alerts-details {
+    border-left: 1px solid #d9e5e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 28px;
+}
+
+.alerts-sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    font-weight: 700;
+}
+
+.patients-count {
+    background: white;
+    border: 1px solid #d9e5e8;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+}
+
+.alerts-patient-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.alert-patient-card {
+    background: white;
+    border-radius: 18px;
+    padding: 18px 20px;
+    border: 1px solid #d9e5e8;
+}
+
+.empty-alerts-state {
+    text-align: center;
+    color: #111827;
+}
+
+.empty-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: #e6eef1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px;
+}
+
+.empty-icon i {
+    font-size: 28px;
+    color: #6b7280;
+}
+
+.empty-alerts-state h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.empty-alerts-state p {
+    color: #6b7280;
+}

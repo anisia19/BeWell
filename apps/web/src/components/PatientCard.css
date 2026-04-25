@@ -6,7 +6,15 @@
     box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06) !important;
     cursor: pointer;
     transition: all 0.2s ease;
-    margin: 12px 0px;
+    margin: 0;
+}
+
+.patient-card:not(.patient-card-compact) {
+    margin: 10px 0;
+}
+
+.patient-card-compact {
+    margin: 0 !important;
 }
 
 .patient-card:hover {
@@ -55,4 +63,17 @@
 .patient-arrow {
     color: #6b7280;
     font-size: 18px;
+}
+
+.patient-card-compact .patient-card-body {
+    padding: 10px 14px !important;
+}
+
+.patient-name.small {
+    font-size: 0.9rem;
+}
+
+.patient-info.small {
+    font-size: 0.8rem;
+    color: #6b7280;
 }

@@ -63,6 +63,7 @@ function Patients() {
       <div className="patients-list-cards">
         {patients.map((p) => (
           <PatientCard
+            variant="default"
             key={p.id}
             name={p.name}
             gender={p.gender}

@@ -1,4 +1,11 @@
-import { Heading, Text, Button } from "@chakra-ui/react";
+import {
+  Heading,
+  Text,
+  Button,
+  Input,
+  InputGroup,
+  InputLeftElement,
+} from "@chakra-ui/react";
 import "../index.css";
 import "./Patients.css";
 function Patients() {
@@ -19,6 +26,14 @@ function Patients() {
           </Button>
         </div>
         <Text fontSize="xs">X total patients</Text>
+      </div>
+      <div className="search-bar-patients">
+        <InputGroup>
+          <InputLeftElement pointerEvents="none">
+            <i className="bi bi-search"></i>
+          </InputLeftElement>
+          <Input placeholder="Search patients..." />
+        </InputGroup>
       </div>
     </>
   );

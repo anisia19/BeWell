@@ -1,0 +1,42 @@
+export const mockPatients = [
+    {
+      id: 1,
+      name: "Elena Vasquez",
+      gender: "Female",
+      age: 42,
+      diagnosis: "Asthma, Allergic Rhinitis",
+      status: "Active",
+    },
+    {
+      id: 2,
+      name: "John Carter",
+      gender: "Male",
+      age: 55,
+      diagnosis: "Hypertension",
+      status: "Active",
+    },
+    {
+      id: 3,
+      name: "Maria Popescu",
+      gender: "Female",
+      age: 37,
+      diagnosis: "Diabetes Type 2",
+      status: "Monitoring",
+    },
+    {
+      id: 4,
+      name: "Andrei Ionescu",
+      gender: "Male",
+      age: 29,
+      diagnosis: "Anxiety Disorder",
+      status: "Active",
+    },
+    {
+      id: 5,
+      name: "Sophia Nguyen",
+      gender: "Female",
+      age: 48,
+      diagnosis: "Cardiovascular Risk",
+      status: "Inactive",
+    },
+  ];

@@ -8,6 +8,8 @@ import {
 } from "@chakra-ui/react";
 import "../index.css";
 import "./Patients.css";
+import PatientCard from "../components/PatientCard";
+import { mockPatients } from "../data/mockPatients";
 function Patients() {
   return (
     <>
@@ -34,6 +36,23 @@ function Patients() {
           </InputLeftElement>
           <Input placeholder="Search patients..." />
         </InputGroup>
+      </div>
+      <div className="patients-list-cards">
+        {mockPatients.map((p) => (
+          <PatientCard
+            key={p.id}
+            name={p.name}
+            gender={p.gender}
+            age={p.age}
+            diagnosis={p.diagnosis}
+            status={p.status}
+            initials={p.name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")}
+            onClick={() => console.log(p.name)}
+          />
+        ))}
       </div>
     </>
   );

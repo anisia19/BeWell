@@ -6,34 +6,29 @@ function Welcome() {
   const navigate = useNavigate();
 
   return (
-    <Box className="welcome-container">
-      <VStack spacing={6}>
-        <Heading size="lg">BeWell</Heading>
+    <div className="welcome-page">
+      <Box className="welcome-container">
+        <VStack spacing={5}>
+          <Heading size="lg" className="welcome-title">
+            BeWell
+          </Heading>
 
-        <Text className="welcome-text">
-          Welcome! Please login or create an account to continue.
-        </Text>
+          <Text className="welcome-text">
+            Welcome! Please login or create an account to continue.
+          </Text>
 
-        <div className="welcome-buttons">
-          <Button
-            colorScheme="teal"
-            width="100%"
-            onClick={() => navigate("/login")}
-          >
-            Login
-          </Button>
+          <div className="welcome-buttons">
+            <Button className="primary" onClick={() => navigate("/login")}>
+              Login
+            </Button>
 
-          <Button
-            variant="outline"
-            colorScheme="teal"
-            width="100%"
-            onClick={() => navigate("/register")}
-          >
-            Register
-          </Button>
-        </div>
-      </VStack>
-    </Box>
+            <Button className="secondary" onClick={() => navigate("/register")}>
+              Register
+            </Button>
+          </div>
+        </VStack>
+      </Box>
+    </div>
   );
 }
 

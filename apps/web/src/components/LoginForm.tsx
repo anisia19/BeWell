@@ -14,7 +14,7 @@ interface FormValues {
   password: string;
 }
 
-const Demo = () => {
+const LoginForm = () => {
   const {
     register,
     handleSubmit,
@@ -24,36 +24,37 @@ const Demo = () => {
   const onSubmit = handleSubmit((data) => console.log(data));
 
   return (
-    <div className="login-container">
+    <div className="login-page">
       <h1>Welcome back to BeWell!</h1>
       <h2>Please log in below!</h2>
+
       <form onSubmit={onSubmit}>
         <Stack spacing="4" align="flex-start" maxW="sm">
           <FormControl isInvalid={!!errors.email}>
             <FormLabel>Email</FormLabel>
-            <Input {...register("email", { required: "Email is required" })} />
-            <FormErrorMessage>
-              {errors.email && errors.email.message}
-            </FormErrorMessage>
+            <Input
+              type="email"
+              {...register("email", { required: "Email is required" })}
+            />
+            <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
           </FormControl>
 
           <FormControl isInvalid={!!errors.password}>
             <FormLabel>Password</FormLabel>
             <Input
-              {...register("password", { required: "Password is required" })}
+              type="password"
+              {...register("password", {
+                required: "Password is required",
+              })}
             />
-            <FormErrorMessage>
-              {errors.password && errors.password.message}
-            </FormErrorMessage>
+            <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
           </FormControl>
 
-          <Button type="submit" colorScheme="blue">
-            Submit
-          </Button>
+          <Button type="submit">Log in</Button>
         </Stack>
       </form>
     </div>
   );
 };
 
-export default Demo;
+export default LoginForm;

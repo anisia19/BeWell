@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Welcome from "./pages/Welcome";
 import RegisterPage from "./pages/RegisterPage";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import PatientDetails from "./pages/PatientDetails";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route index element={<Navigate to="patients" replace />} />
         <Route path="patients" element={<Patients />} />
         <Route path="alerts" element={<DoctorAlerts />} />
+        <Route path="patient-details/:id" element={<PatientDetails />} />
       </Route>
 
       <Route path="/patient" element={<PatientLayout />}>

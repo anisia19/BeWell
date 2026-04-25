@@ -26,7 +26,6 @@ function PatientCard({
   age,
   diagnosis,
   status,
-  initials,
   onClick,
 }: PatientCardProps) {
   return (

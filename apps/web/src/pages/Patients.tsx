@@ -10,7 +10,10 @@ import "../index.css";
 import "./Patients.css";
 import PatientCard from "../components/PatientCard";
 import { mockPatients } from "../data/mockPatients";
+import { useNavigate } from "react-router-dom";
+
 function Patients() {
+  const navigate = useNavigate();
   return (
     <>
       <div className="patients-page">
@@ -46,11 +49,7 @@ function Patients() {
             age={p.age}
             diagnosis={p.diagnosis}
             status={p.status}
-            initials={p.name
-              .split(" ")
-              .map((n) => n[0])
-              .join("")}
-            onClick={() => console.log(p.name)}
+            onClick={() => navigate(`/doctor/patient-details/${p.id}`)}
           />
         ))}
       </div>

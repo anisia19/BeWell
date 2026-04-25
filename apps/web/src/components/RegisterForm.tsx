@@ -5,8 +5,10 @@ import {
   FormErrorMessage,
   Input,
   Stack,
+  useToast,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import "./RegisterForm.css";
 
 interface FormValues {
@@ -14,17 +16,58 @@ interface FormValues {
   password: string;
   firstName: string;
   lastName: string;
-  phoneNumber: number;
+  phoneNumber: string;
 }
 
 const RegisterForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<FormValues>();
+  const toast = useToast();
+  const navigate = useNavigate();
 
-  const onSubmit = handleSubmit((data) => console.log(data));
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      const response = await fetch("http://localhost:3001/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Cont creat cu succes!",
+          description: "Te poți autentifica acum.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        navigate("/login");
+      } else {
+        toast({
+          title: "Eroare",
+          description: result.error || "A apărut o eroare",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Eroare de conexiune",
+        description: "Nu s-a putut conecta la server",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  });
 
   return (
     <div className="register-page">
@@ -56,7 +99,7 @@ const RegisterForm = () => {
           <FormControl isInvalid={!!errors.firstName}>
             <FormLabel>First name</FormLabel>
             <Input
-              type="firstName"
+              type="text"
               {...register("firstName", {
                 required: "First name is required",
               })}
@@ -67,7 +110,7 @@ const RegisterForm = () => {
           <FormControl isInvalid={!!errors.lastName}>
             <FormLabel>Last name</FormLabel>
             <Input
-              type="lastName"
+              type="text"
               {...register("lastName", {
                 required: "Last name is required",
               })}
@@ -95,7 +138,9 @@ const RegisterForm = () => {
             <FormErrorMessage>{errors.phoneNumber?.message}</FormErrorMessage>
           </FormControl>
 
-          <Button type="submit">Create account</Button>
+          <Button type="submit" isLoading={isSubmitting}>
+            Create account
+          </Button>
         </Stack>
       </form>
     </div>

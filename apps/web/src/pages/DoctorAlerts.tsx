@@ -12,18 +12,51 @@ type Patient = {
   alertsCount: number | null;
 };
 
+type Alert = {
+  id: number;
+  title: string;
+  severity: "Critical" | "Medium" | "Low";
+  status: "Active" | "Acknowledged";
+  message: string;
+  time: string;
+};
+
+const mockedAlerts: Record<number, Alert[]> = {
+  1: [
+    {
+      id: 1,
+      title: "SpO2 Alert",
+      severity: "Critical",
+      status: "Active",
+      message: "SpO2 critically low — supplemental oxygen may be required.",
+      time: "13d ago",
+    },
+    {
+      id: 2,
+      title: "HeartRate Alert",
+      severity: "Medium",
+      status: "Acknowledged",
+      message: "Elevated heart rate consistent with respiratory distress.",
+      time: "13d ago",
+    },
+  ],
+};
+
 function DoctorAlerts() {
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
   useEffect(() => {
     fetch("http://localhost:3001/api/patients")
       .then((res) => res.json())
-      .then((data) => {
-        setPatients(data);
-        console.log(data);
-      })
+      .then((data) => setPatients(data))
       .catch((err) => console.error("Error fetching patients:", err));
   }, []);
+
+  const selectedAlerts = selectedPatient
+    ? mockedAlerts[selectedPatient.id] || []
+    : [];
+
   return (
     <div className="alerts-page">
       <h1 className="alerts-title">Alerts Overview</h1>
@@ -46,19 +79,84 @@ function DoctorAlerts() {
                 status={p.status}
                 alertsCount={p.alertsCount ?? 0}
                 variant="compact"
-                onClick={() => console.log(p.name)}
+                onClick={() => setSelectedPatient(p)}
               />
             ))}
           </div>
         </aside>
+
         <main className="alerts-details">
-          <div className="empty-alerts-state">
-            <div className="empty-icon">
-              <i className="bi bi-bell-slash"></i>
+          {!selectedPatient ? (
+            <div className="empty-alerts-state">
+              <div className="empty-icon">
+                <i className="bi bi-bell-slash"></i>
+              </div>
+              <h2>No patient selected</h2>
+              <p>Select a patient from the list to view their alerts</p>
             </div>
-            <h2>No patient selected</h2>
-            <p>Select a patient from the list to view their alerts</p>
-          </div>
+          ) : (
+            <div className="alerts-content">
+              <div className="alerts-content-header">
+                <h2>
+                  <i className="bi bi-bell"></i> Alerts for{" "}
+                  <span>{selectedPatient.name}</span>
+                </h2>
+
+                <div className="alerts-summary">
+                  <span className="active-count">
+                    {selectedAlerts.filter((a) => a.status === "Active").length}{" "}
+                    active
+                  </span>
+                  <span className="total-count">
+                    {selectedAlerts.length} total
+                  </span>
+                </div>
+              </div>
+
+              <h3>Alerts</h3>
+
+              <div className="alerts-list">
+                {selectedAlerts.length === 0 ? (
+                  <p className="no-alerts-text">No alerts for this patient.</p>
+                ) : (
+                  selectedAlerts.map((alert) => (
+                    <div
+                      key={alert.id}
+                      className={`alert-card ${
+                        alert.status === "Acknowledged" ? "acknowledged" : ""
+                      }`}
+                    >
+                      <div className="alert-dot"></div>
+
+                      <div className="alert-main">
+                        <div className="alert-title-row">
+                          <strong>{alert.title}</strong>
+                          <span
+                            className={`severity ${alert.severity.toLowerCase()}`}
+                          >
+                            {alert.severity}
+                          </span>
+                          {alert.status === "Acknowledged" && (
+                            <span className="ack-badge">Acknowledged</span>
+                          )}
+                        </div>
+
+                        <p>{alert.message}</p>
+
+                        <span className="alert-time">
+                          <i className="bi bi-clock"></i> {alert.time}
+                        </span>
+                      </div>
+
+                      {alert.status === "Active" && (
+                        <button className="ack-button">Acknowledge</button>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>

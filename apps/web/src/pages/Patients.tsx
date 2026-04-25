@@ -21,7 +21,7 @@ function Patients() {
             colorScheme="green"
             onClick={() => console.log("Button clicked")}
           >
-            <i className="bi bi-person-add"></i>
+            <i className="bi bi-person-add button-icon-spacing"></i>
             Add Patient
           </Button>
         </div>

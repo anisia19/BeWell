@@ -44,7 +44,7 @@ const SideBarProfile = () => {
         onClick={handleLogout}
         className="sidebar-profile-logout"
       >
-        <i className="bi bi-box-arrow-right"></i>
+        <i className="bi bi-box-arrow-right button-icon-spacing"></i>
         Log out
       </Button>
     </div>

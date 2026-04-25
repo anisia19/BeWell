@@ -77,3 +77,16 @@
     font-size: 0.8rem;
     color: #6b7280;
 }
+
+.patient-alert-count {
+    background: #fef3c7 !important;
+    color: #b45309 !important;
+    border-radius: 999px !important;
+    min-width: 28px;
+    height: 24px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+}

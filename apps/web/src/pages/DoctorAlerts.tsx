@@ -9,6 +9,7 @@ type Patient = {
   age: number | string | null;
   diagnosis: string | null;
   status: string;
+  alertsCount: number | null;
 };
 
 function DoctorAlerts() {
@@ -19,6 +20,7 @@ function DoctorAlerts() {
       .then((res) => res.json())
       .then((data) => {
         setPatients(data);
+        console.log(data);
       })
       .catch((err) => console.error("Error fetching patients:", err));
   }, []);
@@ -42,6 +44,7 @@ function DoctorAlerts() {
                 age={p.age ?? "N/A"}
                 diagnosis={p.diagnosis || "No medical info"}
                 status={p.status}
+                alertsCount={p.alertsCount ?? 0}
                 variant="compact"
                 onClick={() => console.log(p.name)}
               />
@@ -53,7 +56,6 @@ function DoctorAlerts() {
             <div className="empty-icon">
               <i className="bi bi-bell-slash"></i>
             </div>
-
             <h2>No patient selected</h2>
             <p>Select a patient from the list to view their alerts</p>
           </div>

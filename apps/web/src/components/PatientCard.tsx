@@ -16,6 +16,7 @@ type PatientCardProps = {
   age: number | string;
   diagnosis: string;
   status: string;
+  alertsCount?: number;
   variant?: "default" | "compact";
   onClick?: () => void;
 };
@@ -26,6 +27,7 @@ function PatientCard({
   age,
   diagnosis,
   status,
+  alertsCount = 0,
   variant = "default",
   onClick,
 }: PatientCardProps) {
@@ -67,10 +69,17 @@ function PatientCard({
               </Text>
             </Box>
           </HStack>
-
           <HStack spacing={3}>
-            <Badge className="patient-status">{status}</Badge>
-            <i className="bi bi-chevron-right patient-arrow"></i>
+            {variant === "compact" ? (
+              alertsCount > 0 && (
+                <Badge className="patient-alert-count">{alertsCount}</Badge>
+              )
+            ) : (
+              <>
+                <Badge className="patient-status">{status}</Badge>
+                <i className="bi bi-chevron-right patient-arrow"></i>
+              </>
+            )}
           </HStack>
         </HStack>
       </CardBody>

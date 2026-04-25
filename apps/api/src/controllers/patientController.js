@@ -1,48 +1,71 @@
 import pool from '../config/db.js';
 
-/* ===================== GET ALL ===================== */
 export async function getAllPatients(req, res) {
     try {
         const [rows] = await pool.query(`
-      SELECT
-        p.id,
-        p.user_id,
-        u.first_name,
-        u.last_name,
-        u.email,
-        u.phone,
-        p.cnp,
-        p.date_of_birth,
-        p.age,
-        p.gender,
-        p.profession,
-        p.workplace,
-        pa.country,
-        pa.county,
-        pa.city,
-        pa.street,
-        pa.street_number,
-        pa.building,
-        pa.apartment,
-        pa.postal_code,
-        pmp.medical_history,
-        pmp.allergies,
-        pmp.cardiology_consultations,
-        pmp.normal_ecg_min,
-        pmp.normal_ecg_max,
-        pmp.normal_pulse_min,
-        pmp.normal_pulse_max,
-        pmp.normal_temperature_min,
-        pmp.normal_temperature_max,
-        pmp.normal_humidity_min,
-        pmp.normal_humidity_max
-      FROM patients p
-      JOIN users u ON p.user_id = u.id
-      LEFT JOIN patient_addresses pa ON pa.patient_id = p.id
-      LEFT JOIN patient_medical_profiles pmp ON pmp.patient_id = p.id
-      ORDER BY p.id
-    `);
-
+        SELECT
+          p.id,
+          p.user_id,
+          CONCAT(u.first_name, ' ', u.last_name) AS name,
+          u.first_name,
+          u.last_name,
+          u.email,
+          u.phone,
+          p.cnp,
+          p.date_of_birth,
+          p.age,
+          p.gender,
+          p.profession,
+          p.workplace,
+          pa.country,
+          pa.county,
+          pa.city,
+          pa.street,
+          pa.street_number,
+          pa.building,
+          pa.apartment,
+          pa.postal_code,
+          pmp.medical_history,
+          pmp.allergies,
+          CONCAT_WS(', ', pmp.medical_history, pmp.allergies) AS diagnosis,
+      
+          COUNT(a.id) AS alertsCount
+      
+        FROM patients p
+        JOIN users u ON p.user_id = u.id
+        LEFT JOIN patient_addresses pa ON pa.patient_id = p.id
+        LEFT JOIN patient_medical_profiles pmp ON pmp.patient_id = p.id
+        LEFT JOIN alerts a 
+          ON a.patient_id = p.id
+          AND a.status = 'ACTIVE'
+      
+        GROUP BY
+          p.id,
+          p.user_id,
+          u.first_name,
+          u.last_name,
+          u.email,
+          u.phone,
+          p.cnp,
+          p.date_of_birth,
+          p.age,
+          p.gender,
+          p.profession,
+          p.workplace,
+          pa.country,
+          pa.county,
+          pa.city,
+          pa.street,
+          pa.street_number,
+          pa.building,
+          pa.apartment,
+          pa.postal_code,
+          pmp.medical_history,
+          pmp.allergies
+      
+        ORDER BY p.id
+      `);
+        console.log("patients rows:", rows);
         res.json(rows);
     } catch (error) {
         console.error('GET /api/patients error:', error);
@@ -50,7 +73,6 @@ export async function getAllPatients(req, res) {
     }
 }
 
-/* ===================== GET BY ID ===================== */
 export async function getPatientById(req, res) {
     const id = req.params.id;
 
@@ -107,7 +129,6 @@ export async function getPatientById(req, res) {
     }
 }
 
-/* ===================== CREATE ===================== */
 export async function createPatient(req, res) {
     const connection = await pool.getConnection();
 
@@ -121,7 +142,6 @@ export async function createPatient(req, res) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        /* USER */
         const [userResult] = await connection.query(`
       INSERT INTO users (
         email, password_hash, role, first_name, last_name, phone
@@ -136,7 +156,6 @@ export async function createPatient(req, res) {
 
         const userId = userResult.insertId;
 
-        /* PATIENT */
         const [patientResult] = await connection.query(`
       INSERT INTO patients (
         user_id, cnp, date_of_birth, age, gender, profession, workplace
@@ -153,13 +172,11 @@ export async function createPatient(req, res) {
 
         const patientId = patientResult.insertId;
 
-        /* ASSIGNMENT */
         await connection.query(`
       INSERT INTO doctor_patient_assignments (doctor_id, patient_id)
       VALUES (?, ?)
     `, [body.doctor_id, patientId]);
 
-        /* ADDRESS */
         const address = body.address;
 
         await connection.query(`
@@ -178,7 +195,6 @@ export async function createPatient(req, res) {
             address && address.postal_code ? address.postal_code : null
         ]);
 
-        /* MEDICAL PROFILE */
         const mp = body.medical_profile;
 
         await connection.query(`
@@ -220,7 +236,6 @@ export async function createPatient(req, res) {
     }
 }
 
-/* ===================== UPDATE ===================== */
 export async function updatePatient(req, res) {
     const id = req.params.id;
     const connection = await pool.getConnection();
@@ -285,7 +300,6 @@ export async function updatePatient(req, res) {
     }
 }
 
-/* ===================== DELETE ===================== */
 export async function deletePatient(req, res) {
     const id = req.params.id;
 

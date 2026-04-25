@@ -1,0 +1,105 @@
+.register-page {
+    min-height: 100vh;
+    width: 100%;
+    background: radial-gradient(circle at center, #052e16 0%, #000000 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* TITLES */
+
+.register-page h1 {
+    color: #ecfdf5;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.register-page h2 {
+    color: #4ade80;
+    font-size: 0.95rem;
+    font-weight: 400;
+    margin-bottom: 28px;
+}
+
+
+/* CARD */
+
+.register-page form>div {
+    background: rgba(17, 17, 17, 0.75) !important;
+    backdrop-filter: blur(12px);
+    padding: 2.2rem !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(34, 197, 94, 0.2) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
+    width: 420px !important;
+    max-width: 90vw !important;
+}
+
+
+/* LABEL */
+
+.register-page label {
+    color: #22c55e !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    margin-bottom: 6px !important;
+}
+
+
+/* INPUT */
+
+.register-page input,
+.register-page input.chakra-input {
+    background-color: #020617 !important;
+    border: 1px solid rgba(34, 197, 94, 0.25) !important;
+    color: #e5e7eb !important;
+    height: 44px !important;
+    /* 👈 mai mic */
+    font-size: 0.95rem !important;
+    /* 👈 mai fin */
+    border-radius: 10px !important;
+    padding: 0 14px !important;
+    transition: all 0.2s ease;
+}
+
+
+/* HOVER + FOCUS */
+
+.register-page input:focus,
+.register-page input:hover {
+    border-color: #22c55e !important;
+    box-shadow: 0 0 0 1.5px rgba(34, 197, 94, 0.2) !important;
+}
+
+
+/* BUTTON */
+
+.register-page button[type="submit"] {
+    background: linear-gradient(135deg, #14532d, #22c55e) !important;
+    color: white !important;
+    height: 46px !important;
+    /* 👈 mai mic */
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    margin-top: 16px !important;
+    border-radius: 10px !important;
+    width: 100% !important;
+    transition: all 0.2s ease;
+}
+
+.register-page button[type="submit"]:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(34, 197, 94, 0.25);
+}
+
+
+/* ERROR */
+
+.chakra-form__error-message {
+    font-size: 0.8rem !important;
+    margin-top: 4px !important;
+}

@@ -5,11 +5,11 @@
 BeWell is a full-stack health monitoring system for doctors and patients.
 The project includes:
 
-* a **web frontend** built with React + Vite
-* a **backend API** built with Node.js + Express
-* a **MySQL database**
-* cloud support through **AWS RDS**
-* future extensions for mobile integration and wearable sensor data
+- a **web frontend** built with React + Vite
+- a **backend API** built with Node.js + Express
+- a **MySQL database**
+- cloud support through **AWS RDS**
+- future extensions for mobile integration and wearable sensor data
 
 ---
 
@@ -38,28 +38,28 @@ BeWell/
 
 ### Frontend
 
-* React
-* Vite
-* TypeScript
+- React
+- Vite
+- TypeScript
 
 ### Backend
 
-* Node.js
-* Express
-* MySQL2
-* dotenv
-* cors
+- Node.js
+- Express
+- MySQL2
+- dotenv
+- cors
 
 ### Database
 
-* MySQL
-* AWS RDS
+- MySQL
+- AWS RDS
 
 ### Tools
 
-* MySQL Workbench
-* Postman
-* Git / GitHub
+- MySQL Workbench
+- Postman
+- Git / GitHub
 
 ---
 
@@ -116,8 +116,8 @@ The master script runs the SQL files in this order:
 
 Connect either to:
 
-* local MySQL
-* or AWS RDS
+- local MySQL
+- or AWS RDS
 
 Then run:
 
@@ -220,7 +220,7 @@ The frontend calls the backend API running on port `3001`.
 Example:
 
 ```ts
-fetch("http://localhost:3001/api/patients")
+fetch("http://localhost:3001/api/patients");
 ```
 
 If you want to avoid hardcoding the backend URL, create a frontend environment file.
@@ -246,7 +246,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 Example usage:
 
 ```ts
-fetch(`${API_BASE_URL}/api/patients`)
+fetch(`${API_BASE_URL}/api/patients`);
 ```
 
 ---
@@ -284,11 +284,11 @@ Backend:  http://localhost:3001
 
 ### Patients
 
-* `GET /api/patients`
-* `GET /api/patients/:id`
-* `POST /api/patients`
-* `PUT /api/patients/:id`
-* `DELETE /api/patients/:id`
+- `GET /api/patients`
+- `GET /api/patients/:id`
+- `POST /api/patients`
+- `PUT /api/patients/:id`
+- `DELETE /api/patients/:id`
 
 ---
 
@@ -359,8 +359,8 @@ Backend:  http://localhost:3001
 
 At the moment, the database may run either:
 
-* locally
-* or on AWS RDS
+- locally
+- or on AWS RDS
 
 To use AWS RDS, update only the backend `.env` file:
 
@@ -405,26 +405,26 @@ Then open a Pull Request.
 
 ## Important Rules for the Team
 
-* Never commit `.env`
-* Never commit AWS `.pem` keys
-* Always pull latest changes before starting work
-* Install dependencies inside both `apps/api` and `apps/web`
-* Test locally before pushing
-* Do not rewrite shared SQL files without discussing with the team
+- Never commit `.env`
+- Never commit AWS `.pem` keys
+- Always pull latest changes before starting work
+- Install dependencies inside both `apps/api` and `apps/web`
+- Test locally before pushing
+- Do not rewrite shared SQL files without discussing with the team
 
 ---
 
 ## Roadmap
 
-* [x] Database schema
-* [x] Seed data
-* [x] Patient CRUD API
-* [ ] Patient frontend UI
-* [ ] Authentication
-* [ ] Cloud deployment
-* [ ] Mobile integration
-* [ ] Sensor ingestion
-* [ ] Alerts and recommendations
+- [x] Database schema
+- [x] Seed data
+- [x] Patient CRUD API
+- [ ] Patient frontend UI
+- [ ] Authentication
+- [ ] Cloud deployment
+- [ ] Mobile integration
+- [ ] Sensor ingestion
+- [ ] Alerts and recommendations
 
 ---
 

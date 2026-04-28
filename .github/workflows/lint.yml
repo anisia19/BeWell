@@ -1,0 +1,45 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # required for git diff
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          echo "FILES=$(git diff --name-only origin/${{ github.base_ref || 'main' }} -- '*.js' '*.jsx' '*.ts' '*.tsx' | tr '\n' ' ')" >> $GITHUB_ENV
+
+      - name: Run ESLint (changed files only)
+        run: |
+          if [ -z "$FILES" ]; then
+            echo "No JS/TS files changed"
+          else
+            npx eslint $FILES --max-warnings=0
+          fi
+
+      - name: Check Prettier formatting
+        run: npx prettier --check .
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit

@@ -14,8 +14,8 @@ const DoctorLayout = () => {
             </Text>
 
             <VStack align="start" spacing={3}>
-              <NavLink to="/doctor/patients">Patients</NavLink>
-              <NavLink to="/doctor/alerts">Alerts</NavLink>
+              <NavLink to="/doctor/dashboard/patients">Patients</NavLink>
+              <NavLink to="/doctor/dashboard/alerts">Alerts</NavLink>
             </VStack>
           </div>
           <SideBarProfile />

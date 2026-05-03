@@ -15,22 +15,43 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import PatientDetails from "./pages/PatientDetails";
 
 function App() {
+  const isPatientAuthenticated = () => {
+    const userJson = localStorage.getItem("user");
+    if (!userJson) return false;
+
+    try {
+      const user = JSON.parse(userJson);
+      return user.role === "PATIENT";
+    } catch {
+      localStorage.removeItem("user");
+      return false;
+    }
+  };
+
   return (
     <Routes>
       <Route path="/" element={<Welcome />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      <Route path="/doctor" element={<DoctorLayout />}>
+      <Route path="/doctor/dashboard" element={<DoctorLayout />}>
         <Route index element={<Navigate to="patients" replace />} />
         <Route path="patients" element={<Patients />} />
         <Route path="alerts" element={<DoctorAlerts />} />
         <Route path="patient-details/:id" element={<PatientDetails />} />
       </Route>
 
-      <Route path="/patient" element={<PatientLayout />}>
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<Dashboard />} />
+      <Route
+        path="/patient/dashboard"
+        element={
+          isPatientAuthenticated() ? (
+            <PatientLayout />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      >
+        <Route index element={<Dashboard />} />
         <Route path="alerts" element={<PatientAlerts />} />
         <Route path="recommendations" element={<Recommendations />} />
       </Route>

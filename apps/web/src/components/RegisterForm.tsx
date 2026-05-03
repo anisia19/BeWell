@@ -58,7 +58,7 @@ const RegisterForm = () => {
           isClosable: true,
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Eroare de conexiune",
         description: "Nu s-a putut conecta la server",

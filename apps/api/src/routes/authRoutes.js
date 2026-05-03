@@ -46,4 +46,48 @@ router.post("/register", async (req, res) => {
   }
 });
 
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email și parola sunt obligatorii" });
+    }
+
+    const [rows] = await pool.execute(
+      "SELECT id, email, password_hash, role, first_name, last_name, is_active FROM users WHERE email = ?",
+      [email]
+    );
+
+    if (rows.length === 0) {
+      return res.status(401).json({ error: "Email sau parolă incorectă" });
+    }
+
+    const user = rows[0];
+
+    if (!user.is_active) {
+      return res.status(403).json({ error: "Contul nu este activ" });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password_hash);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Email sau parolă incorectă" });
+    }
+
+    res.json({
+      message: "Autentificare reușită",
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        firstName: user.first_name,
+        lastName: user.last_name,
+      },
+    });
+  } catch (error) {
+    console.error("Eroare la autentificare:", error);
+    res.status(500).json({ error: "Eroare internă la server" });
+  }
+});
+
 export default router;

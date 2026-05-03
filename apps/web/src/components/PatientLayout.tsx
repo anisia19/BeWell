@@ -15,8 +15,10 @@ const PatientLayout = () => {
 
             <VStack align="start" spacing={3}>
               <NavLink to="/patient/dashboard">Dashboard</NavLink>
-              <NavLink to="/patient/alerts">Alerts</NavLink>
-              <NavLink to="/patient/recommendations">Recommendations</NavLink>
+              <NavLink to="/patient/dashboard/alerts">Alerts</NavLink>
+              <NavLink to="/patient/dashboard/recommendations">
+                Recommendations
+              </NavLink>
             </VStack>
           </div>
           <SideBarProfile />

@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import DoctorLayout from "./components/DoctorLayout";
-import PatientLayout from "./components/PatientLayout";
+import ProtectedPatientLayout from "./components/ProtectedPatientLayout";
 
 import Patients from "./pages/Patients";
 import DoctorAlerts from "./pages/DoctorAlerts";
@@ -15,19 +15,6 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import PatientDetails from "./pages/PatientDetails";
 
 function App() {
-  const isPatientAuthenticated = () => {
-    const userJson = localStorage.getItem("user");
-    if (!userJson) return false;
-
-    try {
-      const user = JSON.parse(userJson);
-      return user.role === "PATIENT";
-    } catch {
-      localStorage.removeItem("user");
-      return false;
-    }
-  };
-
   return (
     <Routes>
       <Route path="/" element={<Welcome />} />
@@ -41,16 +28,7 @@ function App() {
         <Route path="patient-details/:id" element={<PatientDetails />} />
       </Route>
 
-      <Route
-        path="/patient/dashboard"
-        element={
-          isPatientAuthenticated() ? (
-            <PatientLayout />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      >
+      <Route path="/patient/dashboard" element={<ProtectedPatientLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="alerts" element={<PatientAlerts />} />
         <Route path="recommendations" element={<Recommendations />} />

@@ -81,9 +81,6 @@ function Dashboard() {
           />
         ))}
       </div>
-      <div className ="patient-graph-section">
-        <PatientGraph />
-      </div>
     </>
   );
 }

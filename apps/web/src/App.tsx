@@ -5,7 +5,6 @@ import ProtectedPatientLayout from "./components/ProtectedPatientLayout";
 
 import Patients from "./pages/Patients";
 import DoctorAlerts from "./pages/DoctorAlerts";
-import Dashboard from "./pages/Dashboard";
 import PatientAlerts from "./pages/PatientAlerts";
 import Recommendations from "./pages/Recommendations";
 import Login from "./pages/Login";
@@ -13,6 +12,7 @@ import Welcome from "./pages/Welcome";
 import RegisterPage from "./pages/RegisterPage";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import PatientDetails from "./pages/PatientDetails";
+import HomePagePatient from "./pages/HomePagePatient";
 
 function App() {
   return (
@@ -29,7 +29,7 @@ function App() {
       </Route>
 
       <Route path="/patient/dashboard" element={<ProtectedPatientLayout />}>
-        <Route index element={<Dashboard />} />
+        <Route index element={<HomePagePatient />} />
         <Route path="alerts" element={<PatientAlerts />} />
         <Route path="recommendations" element={<Recommendations />} />
       </Route>

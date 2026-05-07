@@ -1,0 +1,40 @@
+.patient-tabs-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    padding: 6px;
+    border-radius: 20px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+.patient-tab-button {
+    background: transparent !important;
+    color: #111827 !important;
+    border-radius: 14px !important;
+    padding: 8px 16px !important;
+    height: 38px !important;
+    font-weight: 500 !important;
+    font-size: 0.95rem !important;
+}
+
+.patient-tab-button:hover {
+    background: #f3f4f6 !important;
+}
+
+.patient-tab-button.active {
+    background: #06b6d4 !important;
+    color: white !important;
+}
+
+.tab-placeholder {
+    width: 100%;
+    min-height: 300px;
+    background: white;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}

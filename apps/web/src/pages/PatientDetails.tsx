@@ -4,6 +4,7 @@ import { VStack, Spinner, Text } from "@chakra-ui/react";
 
 import PatientCard from "../components/PatientCard";
 import AllChartsData from "../components/AllChartsData";
+import PatientTabs from "../components/PatientTabs";
 
 type Patient = {
   id: string;
@@ -77,7 +78,7 @@ const PatientDetails = () => {
         />
       </VStack>
 
-      <AllChartsData />
+      <PatientTabs />
     </>
   );
 };

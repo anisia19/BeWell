@@ -17,7 +17,7 @@ type PatientCardProps = {
   diagnosis: string;
   status: string;
   alertsCount?: number;
-  variant?: "default" | "compact";
+  variant?: "default" | "compact" | "details";
   cnp: string;
   onClick?: () => void;
 };
@@ -37,7 +37,7 @@ function PatientCard({
     <Card
       className={`patient-card ${
         variant === "compact" ? "patient-card-compact" : ""
-      }`}
+      } ${variant === "details" ? "patient-card-details" : ""}`}
       onClick={onClick}
     >
       <CardBody className="patient-card-body">
@@ -78,18 +78,29 @@ function PatientCard({
               </Text>
             </Box>
           </HStack>
-          <HStack spacing={3}>
-            {variant === "compact" ? (
-              alertsCount > 0 && (
-                <Badge className="patient-alert-count">{alertsCount}</Badge>
-              )
-            ) : (
-              <>
-                <Badge className="patient-status">{status}</Badge>
-                <i className="bi bi-chevron-right patient-arrow"></i>
-              </>
-            )}
-          </HStack>
+          {variant === "details" ? (
+            <Box textAlign="right">
+              <Text fontSize="sm" color="gray.600">
+                Active Alerts
+              </Text>
+              <Text fontSize="2xl" fontWeight="bold" color="red.500">
+                {alertsCount}
+              </Text>
+            </Box>
+          ) : (
+            <HStack spacing={3}>
+              {variant === "compact" ? (
+                alertsCount > 0 && (
+                  <Badge className="patient-alert-count">{alertsCount}</Badge>
+                )
+              ) : (
+                <>
+                  <Badge className="patient-status">{status}</Badge>
+                  <i className="bi bi-chevron-right patient-arrow"></i>
+                </>
+              )}
+            </HStack>
+          )}
         </HStack>
       </CardBody>
     </Card>

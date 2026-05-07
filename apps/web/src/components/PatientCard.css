@@ -90,3 +90,46 @@
     font-weight: 700 !important;
     font-size: 0.85rem !important;
 }
+
+.patient-card-details {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    cursor: default;
+    margin: 0 0 24px 0 !important;
+    border-radius: 18px !important;
+}
+
+.patient-card-details:hover {
+    transform: none !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06) !important;
+}
+
+.patient-card-details .patient-card-body {
+    padding: 14px 24px !important;
+}
+
+.patient-card-details .patient-avatar {
+    width: 54px !important;
+    height: 54px !important;
+    background: #cffafe !important;
+    color: #0e7490 !important;
+}
+
+.patient-card-details .patient-name {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.patient-card-details .patient-info {
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+
+.patient-card-details .patient-gender {
+    background: #dcfce7 !important;
+    color: #15803d !important;
+    border-radius: 999px !important;
+    padding: 3px 10px !important;
+    font-weight: 500 !important;
+}

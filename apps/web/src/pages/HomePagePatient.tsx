@@ -1,8 +1,7 @@
 import AllChartsData from "../components/AllChartsData";
 
-function HomePagePatient()
-{
-  return AllChartsData();
+const HomePagePatient = () => {
+  return <div><AllChartsData /></div>;
 };
 
 export default HomePagePatient;

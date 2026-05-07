@@ -1,7 +1,8 @@
 import "../index.css";
+import AllChartsData from "../components/AllChartsData";
 
 const PatientDetails = () => {
-  return <div>PatientDetails</div>;
+  return <div><AllChartsData /></div>;
 };
 
 export default PatientDetails;

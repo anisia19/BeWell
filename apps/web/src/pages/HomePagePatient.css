@@ -1,28 +1,31 @@
-/* Containerul care ține ambele grafice */
 .charts-wrapper {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* Creează exact 2 coloane egale */
-  gap: 24px; /* Spațiul dintre grafice (poți ajusta valoarea) */
-  padding: 24px; /* Spațiul exterior în jurul tuturor graficelor */
-  width: 100%;
-  max-width: 1600px; /* Opțional: previne lățirea extremă pe monitoare ultra-wide */
-  margin: 0 auto; /* Centrează grid-ul pe pagină */
-  box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    padding: 24px;
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
-/* Stil pentru fiecare container de grafic în parte */
 .chart-container {
-  flex: 1; /* Forțează ambele grafice să împartă spațiul egal (50/50) */
-  background-color: #ffffff;
-  border: 1px solid #e1e4e8;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  min-width: 0; /* Important pentru ca graficele să nu "spargă" layout-ul flex */
+    flex: 1;
+    background-color: #ffffff;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    min-width: 0;
 }
 
-/* Responsivitate: Dacă ecranul este mai mic de 1000px, pune-le unul sub altul */
 @media (max-width: 1000px) {
-  .charts-wrapper {
-    flex-direction: column;
-  }
+    .charts-wrapper {
+        flex-direction: column;
+    }
+}
+
+.charts-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 24px;
 }

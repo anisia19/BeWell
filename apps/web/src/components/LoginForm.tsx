@@ -8,7 +8,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./LoginForm.css";
 
 interface FormValues {
@@ -97,7 +97,20 @@ const LoginForm = () => {
             />
             <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
           </FormControl>
-
+           {/* --- MUTĂ CODUL AICI, SUB FORMCONTROL --- */}
+          <div style={{ width: "100%", textAlign: "right", marginTop: "-8px" }}>
+            <Link 
+              to="/forgot-password" 
+              style={{ 
+                color: "#22c55e", 
+                fontWeight: "600", 
+                fontSize: "14px",
+                textDecoration: "none" 
+              }}
+            >
+              Forgot Password?
+            </Link>
+          </div>
           <Button type="submit" isLoading={isSubmitting}>
             Log in
           </Button>

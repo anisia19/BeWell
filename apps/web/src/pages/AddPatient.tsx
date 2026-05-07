@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { useToast } from "@chakra-ui/react";
 import "../index.css";
+import "./AddPatient.css";
 
 function AddPatient() {
+
+  const toast = useToast();
 
   const [formData, setFormData] = useState({
     doctor_id: 1,
@@ -13,17 +17,69 @@ function AddPatient() {
     workplace: "",
   });
 
+  const [cnpError, setCnpError] = useState("");
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
 
+    const { name, value } = e.target;
+
+    if (name === "cnp") {
+
+      // doar cifre
+      if (!/^\d*$/.test(value)) {
+
+        setCnpError("CNP must contain only numbers");
+        return;
+      }
+
+      // maxim 13 cifre
+      if (value.length > 13) {
+
+        setCnpError(
+          "CNP cannot contain more than 13 digits"
+        );
+
+        return;
+      }
+
+      // prima cifra
+      if (
+        value.length > 0 &&
+        !["1", "2", "5", "6"].includes(value[0])
+      ) {
+
+        setCnpError(
+          "CNP must start with 1, 2, 5 or 6"
+        );
+
+      } else {
+
+        setCnpError("");
+      }
+    }
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
   };
 
   const handleSubmit = async () => {
+
+    if (formData.cnp.length !== 13) {
+
+      setCnpError(
+        "CNP must contain exactly 13 digits"
+      );
+
+      return;
+    }
+
+    if (cnpError) {
+      return;
+    }
 
     try {
 
@@ -42,178 +98,152 @@ function AddPatient() {
 
       if (response.ok) {
 
-        alert("Patient created successfully!");
+        toast({
+          title: "Patient created",
+          description:
+            "Patient was added successfully",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
 
       } else {
 
-        alert(data.error || "Error creating patient");
+        toast({
+          title: "Error",
+          description:
+            data.error || "Failed to create patient",
+          status: "error",
+          duration: 4000,
+          isClosable: true,
+        });
       }
 
     } catch (error) {
 
       console.error(error);
 
-      alert("Server error");
+      toast({
+        title: "Server Error",
+        description:
+          "Something went wrong",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
     }
   };
 
-  const inputStyle = {
-    width: "100%",
-    padding: "10px",
-    borderRadius: "10px",
-    border: "none",
-    backgroundColor: "#020617",
-    color: "white",
-    fontSize: "14px",
-    marginTop: "6px",
-    outline: "none",
-    boxShadow: "none",
-    height: "42px",
-  };
-
-  const labelStyle = {
-    color: "#31d67b",
-    fontWeight: "bold",
-    fontSize: "14px",
-  };
-
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background:
-          "linear-gradient(to right, #000000, #001a0d, #00331a)",
-        padding: "20px",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "420px",
-        }}
-      >
-        <h1
-          style={{
-            color: "white",
-            fontSize: "32px",
-            textAlign: "center",
-            fontWeight: "bold",
-            marginBottom: "6px",
-          }}
-        >
+    <div className="add-patient-page">
+
+      <div className="add-patient-container">
+
+        <h1 className="add-patient-title">
           Add New Patient
         </h1>
 
-        <p
-          style={{
-            color: "#31d67b",
-            textAlign: "center",
-            fontSize: "15px",
-            marginBottom: "24px",
-          }}
-        >
+        <p className="add-patient-subtitle">
           Create a patient profile
         </p>
 
-        <div
-          style={{
-            backgroundColor: "#04110a",
-            borderRadius: "22px",
-            padding: "24px",
-            border: "1px solid #0b5d2a",
-          }}
-        >
+        <div className="add-patient-card">
 
-          <div style={{ marginBottom: "18px" }}>
-            <label style={labelStyle}>Email</label>
+          <div className="add-patient-field">
+            <label className="add-patient-label">
+              Email
+            </label>
 
             <input
               name="email"
               type="email"
               onChange={handleChange}
-              style={inputStyle}
+              className="add-patient-input"
             />
           </div>
 
-          <div style={{ marginBottom: "18px" }}>
-            <label style={labelStyle}>CNP</label>
+          <div className="add-patient-field">
+            <label className="add-patient-label">
+              CNP
+            </label>
 
             <input
               name="cnp"
+              value={formData.cnp}
               onChange={handleChange}
-              style={inputStyle}
+              className="add-patient-input"
             />
+
+            {cnpError && (
+              <p className="add-patient-error">
+                {cnpError}
+              </p>
+            )}
           </div>
 
-          <div style={{ marginBottom: "18px" }}>
-            <label style={labelStyle}>Date of birth</label>
+          <div className="add-patient-field">
+            <label className="add-patient-label">
+              Date of birth
+            </label>
 
             <input
               name="date_of_birth"
               type="date"
-              className="dark-date-input"
               onChange={handleChange}
-              style={inputStyle}
+              className="add-patient-input"
             />
           </div>
 
-          <div style={{ marginBottom: "18px" }}>
-            <label style={labelStyle}>Gender</label>
+          <div className="add-patient-field">
+            <label className="add-patient-label">
+              Gender
+            </label>
 
             <select
               name="gender"
-              className="dark-select"
               onChange={handleChange}
-              style={inputStyle}
+              className="add-patient-input"
             >
               <option value="MALE">Male</option>
               <option value="FEMALE">Female</option>
             </select>
           </div>
 
-          <div style={{ marginBottom: "18px" }}>
-            <label style={labelStyle}>Profession</label>
+          <div className="add-patient-field">
+            <label className="add-patient-label">
+              Profession
+            </label>
 
             <input
               name="profession"
               onChange={handleChange}
-              style={inputStyle}
+              className="add-patient-input"
             />
           </div>
 
-          <div style={{ marginBottom: "28px" }}>
-            <label style={labelStyle}>Workplace</label>
+          <div className="add-patient-field">
+            <label className="add-patient-label">
+              Workplace
+            </label>
 
             <input
               name="workplace"
               onChange={handleChange}
-              style={inputStyle}
+              className="add-patient-input"
             />
           </div>
 
           <button
             onClick={handleSubmit}
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: "12px",
-              border: "none",
-              background:
-                "linear-gradient(to right, #157a36, #22c55e)",
-              color: "white",
-              fontSize: "16px",
-              fontWeight: "bold",
-              cursor: "pointer",
-            }}
+            className="add-patient-button"
           >
             Create Patient
           </button>
 
         </div>
+
       </div>
+
     </div>
   );
 }

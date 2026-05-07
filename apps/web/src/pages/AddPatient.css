@@ -1,0 +1,87 @@
+.add-patient-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    padding: 10px;
+}
+
+.add-patient-container {
+    width: 100%;
+    max-width: 380px;
+}
+
+.add-patient-title {
+    color: #111827;
+    font-size: 26px;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.add-patient-subtitle {
+    color: #16a34a;
+    text-align: center;
+    font-size: 13px;
+    margin-bottom: 18px;
+}
+
+.add-patient-card {
+    background: white;
+    border-radius: 18px;
+    padding: 18px;
+    border: 1px solid #d1d5db;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.add-patient-field {
+    margin-bottom: 12px;
+}
+
+.add-patient-label {
+    color: #16a34a;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.add-patient-input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #111827;
+    font-size: 13px;
+    margin-top: 4px;
+    outline: none;
+    height: 36px;
+    box-sizing: border-box;
+}
+
+.add-patient-input:focus {
+    border: 1px solid #16a34a;
+}
+
+.add-patient-error {
+    color: #ef4444;
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+.add-patient-button {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(to right, #16a34a, #22c55e);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 6px;
+}
+
+.add-patient-button:hover {
+    opacity: 0.9;
+}

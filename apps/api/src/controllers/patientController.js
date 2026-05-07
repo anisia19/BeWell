@@ -283,6 +283,13 @@ export async function createPatient(req, res) {
 
         console.error('CREATE PATIENT ERROR:', error);
 
+        if (error.code === 'ER_DUP_ENTRY') {
+
+            return res.status(400).json({
+                error: 'CNP already exists'
+            });
+        }
+
         res.status(500).json({
             error: 'Failed to create patient'
         });

@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from "react";
+﻿/*
+import { useEffect, useState } from "react";
 import { Heading, Text, Button } from "@chakra-ui/react";
 import "../index.css";
 import "./Patients.css";
@@ -85,3 +86,4 @@ function Dashboard() {
   );
 }
 export default Dashboard;
+*/

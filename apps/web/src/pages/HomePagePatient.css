@@ -2,13 +2,16 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 24px;
+}
+
+.main {
     padding: 24px;
-    width: 100%;
     max-width: 1600px;
     margin: 0 auto;
     box-sizing: border-box;
 }
 
+/* Stil pentru fiecare container de grafic în parte */
 .chart-container {
     flex: 1;
     background-color: #ffffff;

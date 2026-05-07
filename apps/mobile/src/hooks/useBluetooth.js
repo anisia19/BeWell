@@ -60,17 +60,16 @@ export default function useBluetooth(isOnline, alertRules) {
             if (device?.name) {
               setFoundDevices(prev => {
                 if (prev.find(d => d.id === device.id)) return prev;
-                return [...prev, { id: device.id, name: device.name }];
+                return [...prev, { id: device.id, name: device.name, rssi: device.rssi, device }];
               });
-              if (device.name.includes('BeWell')) {
-                bleManager.current.stopDeviceScan();
-                connectToDevice(device);
-              }
             }
           });
 
+          // Oprește scanarea după 10 secunde
           setTimeout(() => {
-            bleManager.current.stopDeviceScan();
+            if (bleManager.current) {
+              bleManager.current.stopDeviceScan();
+            }
             setIsScanning(false);
           }, 10000);
         }
@@ -82,18 +81,22 @@ export default function useBluetooth(isOnline, alertRules) {
     }
   };
 
-  const connectToDevice = async (device) => {
+  const connectToDevice = async (deviceInfo) => {
     try {
-      const connected = await device.connect();
-      await connected.discoverAllServicesAndCharacteristics();
-      setConnectedDevice(connected);
+      if (bleManager.current) {
+        bleManager.current.stopDeviceScan();
+      }
       setIsScanning(false);
+
+      const connected = await deviceInfo.device.connect();
+      await connected.discoverAllServicesAndCharacteristics();
+      setConnectedDevice({ name: deviceInfo.name, id: deviceInfo.id });
+      setFoundDevices([]);
       startReadingData(connected);
       startSendTimer();
-      console.log(`Conectat la ${device.name}`);
+      console.log(`Conectat la ${deviceInfo.name}`);
     } catch (error) {
       console.error('Eroare conectare:', error);
-      setIsScanning(false);
     }
   };
 
@@ -106,7 +109,9 @@ export default function useBluetooth(isOnline, alertRules) {
 
   const disconnectDevice = async () => {
     if (connectedDevice) {
-      await connectedDevice.cancelConnection();
+      try {
+        await bleManager.current?.cancelDeviceConnection(connectedDevice.id);
+      } catch (e) {}
     }
     setConnectedDevice(null);
     setSensorData({ ecg: null, temperature: null, humidity: null, pulse: null });
@@ -145,12 +150,10 @@ export default function useBluetooth(isOnline, alertRules) {
         try {
           if (isOnline) {
             await sendSensorData(avg);
-            console.log('Date senzori trimise la cloud');
           } else {
             await savePendingSensorData(avg);
           }
         } catch (error) {
-          console.error('Eroare trimitere:', error);
           await savePendingSensorData(avg);
         }
       }
@@ -232,6 +235,7 @@ export default function useBluetooth(isOnline, alertRules) {
     alerts,
     startScanning,
     stopScanning,
+    connectToDevice,
     disconnectDevice,
   };
 }

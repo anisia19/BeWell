@@ -39,7 +39,7 @@ export default function HomeScreen({ onLogout }) {
   const { data: accelData, isActive } = useAccelerometer(isOnline);
   const {
     isScanning, connectedDevice, foundDevices, sensorData, alerts,
-    startScanning, stopScanning, disconnectDevice,
+    startScanning, stopScanning, connectToDevice, disconnectDevice,
   } = useBluetooth(isOnline, alertRules);
 
   if (loadingProfile) {
@@ -90,7 +90,7 @@ export default function HomeScreen({ onLogout }) {
         </Text>
         <View style={styles.wavePlaceholder}>
           <Text style={styles.wavePlaceholderText}>
-            {connectedDevice ? '~ ECG live ~' : 'Conectează BLE pentru date live'}
+            {connectedDevice ? `Conectat la ${connectedDevice.name}` : 'Conectează BLE pentru date live'}
           </Text>
         </View>
       </View>
@@ -122,29 +122,47 @@ export default function HomeScreen({ onLogout }) {
 
       <View style={styles.btCard}>
         {!connectedDevice ? (
-          <TouchableOpacity
-            style={[styles.btButton, isScanning && styles.btButtonScanning]}
-            onPress={isScanning ? stopScanning : startScanning}
-          >
-            <Text style={styles.btButtonText}>
-              {isScanning ? 'Scanare... (Oprește)' : 'Conectează Bluetooth'}
-            </Text>
-          </TouchableOpacity>
+          <>
+            <TouchableOpacity
+              style={[styles.btButton, isScanning && styles.btButtonScanning]}
+              onPress={isScanning ? stopScanning : startScanning}
+            >
+              <Text style={styles.btButtonText}>
+                {isScanning ? 'Oprește scanarea' : 'Scanează Bluetooth'}
+              </Text>
+            </TouchableOpacity>
+
+            {isScanning && foundDevices.length === 0 && (
+              <Text style={styles.scanningText}>Căutare dispozitive...</Text>
+            )}
+
+            {foundDevices.length > 0 && (
+              <View style={styles.devicesContainer}>
+                <Text style={styles.devicesTitle}>
+                  {isScanning ? 'Dispozitive găsite — selectează unul:' : 'Dispozitive găsite:'}
+                </Text>
+                {foundDevices.map((d, i) => (
+                  <TouchableOpacity
+                    key={i}
+                    style={styles.deviceItem}
+                    onPress={() => connectToDevice(d)}
+                  >
+                    <View style={styles.deviceInfo}>
+                      <Text style={styles.deviceName}>{d.name}</Text>
+                      <Text style={styles.deviceId}>{d.id}</Text>
+                    </View>
+                    <View style={styles.connectBadge}>
+                      <Text style={styles.connectBadgeText}>Conectează</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </>
         ) : (
           <TouchableOpacity style={styles.btButtonDisconnect} onPress={disconnectDevice}>
-            <Text style={styles.btButtonText}>Deconectează</Text>
+            <Text style={styles.btButtonText}>Deconectează {connectedDevice.name}</Text>
           </TouchableOpacity>
-        )}
-        {foundDevices.length > 0 && (
-          <View style={styles.devicesContainer}>
-            <Text style={styles.devicesTitle}>Dispozitive găsite:</Text>
-            {foundDevices.map((d, i) => (
-              <Text key={i} style={styles.deviceItem}>• {d.name}</Text>
-            ))}
-          </View>
-        )}
-        {isScanning && foundDevices.length === 0 && (
-          <Text style={styles.scanningText}>Căutare dispozitive BeWell...</Text>
         )}
       </View>
 
@@ -193,9 +211,14 @@ const styles = StyleSheet.create({
   btButtonScanning: { backgroundColor: '#7C2D12' },
   btButtonDisconnect: { backgroundColor: '#450A0A', borderRadius: 10, padding: 12, alignItems: 'center' },
   btButtonText: { color: '#6EE7B7', fontWeight: '500', fontSize: 14 },
-  devicesContainer: { marginTop: 10 },
-  devicesTitle: { fontSize: 11, color: '#6B7280', marginBottom: 4 },
-  deviceItem: { fontSize: 11, color: '#58A6FF', marginBottom: 2 },
+  devicesContainer: { marginTop: 12 },
+  devicesTitle: { fontSize: 12, color: '#6B7280', marginBottom: 8 },
+  deviceItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#0D1117', borderRadius: 10, padding: 12, marginBottom: 8, borderWidth: 0.5, borderColor: '#21262D' },
+  deviceInfo: { flex: 1 },
+  deviceName: { fontSize: 13, fontWeight: '500', color: 'white', marginBottom: 2 },
+  deviceId: { fontSize: 10, color: '#4B5563' },
+  connectBadge: { backgroundColor: '#064E3B', borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 },
+  connectBadgeText: { fontSize: 11, color: '#6EE7B7', fontWeight: '500' },
   scanningText: { fontSize: 11, color: '#F59E0B', textAlign: 'center', marginTop: 8 },
   alertCard: { marginHorizontal: 12, marginBottom: 10, backgroundColor: '#1A0A0A', borderRadius: 16, padding: 14, borderWidth: 0.5, borderColor: '#6E3535' },
   alertTitle: { fontSize: 12, color: '#FCA5A5', fontWeight: '500', marginBottom: 6 },

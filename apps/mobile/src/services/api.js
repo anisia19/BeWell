@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'http://10.234.21.79:3001';
+const API_BASE_URL = 'http://10.48.64.79:3001';
 
 const getHeaders = async () => {
   const token = await AsyncStorage.getItem('token');
@@ -28,6 +28,7 @@ export const login = async (email, password) => {
   }
   return data;
 };
+
 export const register = async (email, password, first_name, last_name, cnp, phone) => {
   const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
     method: 'POST',
@@ -93,6 +94,15 @@ export const sendAlertNote = async (alertId, note) => {
     method: 'POST',
     headers,
     body: JSON.stringify({ alert_id: alertId, note }),
+  });
+  return handleResponse(res);
+};
+
+export const deleteAlertNote = async (noteId) => {
+  const headers = await getHeaders();
+  const res = await fetch(`${API_BASE_URL}/api/alert-notes/${noteId}`, {
+    method: 'DELETE',
+    headers,
   });
   return handleResponse(res);
 };

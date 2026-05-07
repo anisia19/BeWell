@@ -4,6 +4,7 @@ import patientRoutes from './routes/patientRoutes.js';
 import accelerometerRoutes from './routes/accelerometerRoutes.js';
 import sensorRoutes from './routes/sensorRoutes.js';
 import alertRoutes from './routes/alertRoutes.js';
+import alertNoteRoutes from './routes/alertNoteRoutes.js';
 import recommendationRoutes from './routes/recommendationRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 
@@ -21,7 +22,7 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/accelerometer-readings', accelerometerRoutes);
 app.use('/api/sensor-readings', sensorRoutes);
 app.use('/api/alerts', alertRoutes);
-app.use('/api/alert-notes', alertRoutes);
+app.use('/api/alert-notes', alertNoteRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/recommendation-schedules', recommendationRoutes);
 

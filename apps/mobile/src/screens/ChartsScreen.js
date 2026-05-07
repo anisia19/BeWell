@@ -6,7 +6,7 @@ import {
 import { LineChart } from 'react-native-chart-kit';
 
 const screenWidth = Dimensions.get('window').width - 32;
-const API_BASE_URL = 'http://10.234.21.79:3001';
+const API_BASE_URL = 'http://10.48.64.79:3001';
 
 export default function ChartsScreen() {
   const [loading, setLoading] = useState(true);

@@ -14,3 +14,19 @@ body {
 .button-icon-spacing {
     margin-right: 8px;
 }
+
+input:focus,
+select:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.dark-date-input {
+    color-scheme: dark;
+}
+
+.dark-select {
+    background-color: #020617;
+    color: white;
+    border: none;
+}

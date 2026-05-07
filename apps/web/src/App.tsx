@@ -13,6 +13,7 @@ import RegisterPage from "./pages/RegisterPage";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import PatientDetails from "./pages/PatientDetails";
 import HomePagePatient from "./pages/HomePagePatient";
+import AddPatient from "./pages/AddPatient";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="patients" element={<Patients />} />
         <Route path="alerts" element={<DoctorAlerts />} />
         <Route path="patient-details/:id" element={<PatientDetails />} />
+        <Route path="add-patient" element={<AddPatient />} />
       </Route>
 
       <Route path="/patient/dashboard" element={<ProtectedPatientLayout />}>

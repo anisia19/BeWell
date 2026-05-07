@@ -18,13 +18,15 @@ const DoctorLayout = () => {
               <NavLink to="/doctor/dashboard/alerts">Alerts</NavLink>
             </VStack>
           </div>
+
           <SideBarProfile />
         </Stack>
       </GridItem>
 
-      <GridItem bg="gray.50" p={6}>
+      <GridItem p={0}>
         <Outlet />
       </GridItem>
+
     </Grid>
   );
 };

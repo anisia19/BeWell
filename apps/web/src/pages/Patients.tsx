@@ -6,6 +6,7 @@ import PatientCard from "../components/PatientCard";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 
+
 type Patient = {
   id: number;
   name: string;
@@ -50,7 +51,7 @@ function Patients() {
           <Button
             variant="solid"
             colorScheme="green"
-            onClick={() => console.log("Button clicked")}
+            onClick={() => navigate("/doctor/dashboard/add-patient")}
           >
             <i className="bi bi-person-add button-icon-spacing"></i>
             Add Patient

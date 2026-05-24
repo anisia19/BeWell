@@ -5,7 +5,7 @@ import "./Patients.css";
 import PatientCard from "../components/PatientCard";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
-import PatientGraph from "../components/PatientGraph";
+
 type Patient = {
   id: number;
   name: string;
@@ -18,7 +18,11 @@ type Patient = {
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [patients, setPatients] = useState<Patient[]>([]);
+
+  const [patients, setPatients] = useState<
+    Patient[]
+  >([]);
+
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -27,12 +31,19 @@ function Dashboard() {
       .then((data) => {
         setPatients(data);
       })
-      .catch((err) => console.error("Error fetching patients:", err));
+      .catch((err) =>
+        console.error(
+          "Error fetching patients:",
+          err
+        )
+      );
   }, []);
 
   useEffect(() => {
     const delay = setTimeout(() => {
-      fetch(`http://localhost:3001/api/patients?search=${search}`)
+      fetch(
+        `http://localhost:3001/api/patients?search=${search}`
+      )
         .then((res) => res.json())
         .then((data) => setPatients(data));
     }, 300);
@@ -47,17 +58,25 @@ function Dashboard() {
           <Heading as="h3" size="md">
             Patients
           </Heading>
+
           <Button
             variant="solid"
             colorScheme="green"
-            onClick={() => console.log("Button clicked")}
+            onClick={() =>
+              console.log("Button clicked")
+            }
           >
             <i className="bi bi-person-add button-icon-spacing"></i>
+
             Add Patient
           </Button>
         </div>
-        <Text fontSize="xs">{patients.length} total patients</Text>
+
+        <Text fontSize="xs">
+          {patients.length} total patients
+        </Text>
       </div>
+
       <div className="search-bar-patients">
         <SearchBar
           className="search-bar-patients"
@@ -66,6 +85,7 @@ function Dashboard() {
           onChange={setSearch}
         />
       </div>
+
       <div className="patients-list-cards">
         {patients.map((p) => (
           <PatientCard
@@ -75,13 +95,21 @@ function Dashboard() {
             name={p.name}
             gender={p.gender}
             age={p.age ?? "N/A"}
-            diagnosis={p.diagnosis || "No medical info added"}
+            diagnosis={
+              p.diagnosis ||
+              "No medical info added"
+            }
             status={p.status}
-            onClick={() => navigate(`/doctor/patient-details/${p.id}`)}
+            onClick={() =>
+              navigate(
+                `/doctor/dashboard/patient-details/${p.id}`
+              )
+            }
           />
         ))}
       </div>
     </>
   );
 }
+
 export default Dashboard;

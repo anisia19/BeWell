@@ -1,185 +1,281 @@
+import { useMemo, useState } from "react";
 import "./DoctorAlerts.css";
-import PatientCard from "../components/PatientCard";
-import { useEffect, useState } from "react";
-import SearchBar from "../components/SearchBar";
-
-type Patient = {
-  id: number;
-  name: string;
-  gender: string;
-  age: number | string | null;
-  diagnosis: string | null;
-  status: string;
-  alertsCount: number | null;
-  cnp: string;
-};
 
 type Alert = {
   id: number;
   title: string;
   severity: "Critical" | "Medium" | "Low";
-  status: "Active" | "Acknowledged";
   message: string;
   time: string;
+  status: "Active" | "Acknowledged";
 };
 
-const mockedAlerts: Record<number, Alert[]> = {
+type Patient = {
+  id: number;
+  name: string;
+  diagnosis: string;
+  initials: string;
+};
+
+const patients: Patient[] = [
+  {
+    id: 1,
+    name: "Bogdan Fona",
+    diagnosis: "Asthma, Allergic Rhinitis",
+    initials: "BF",
+  },
+  {
+    id: 2,
+    name: "Ana Staicu",
+    diagnosis: "Type 2 Diabetes",
+    initials: "AS",
+  },
+  {
+    id: 3,
+    name: "Alex Marin",
+    diagnosis: "Heart Failure",
+    initials: "AM",
+  },
+  {
+    id: 4,
+    name: "Alexandra Chiriac",
+    diagnosis: "Hypertension",
+    initials: "AC",
+  },
+];
+
+const initialAlerts: Record<number, Alert[]> = {
   1: [
     {
       id: 1,
-      title: "SpO2 Alert",
-      severity: "Critical",
-      status: "Active",
-      message: "SpO2 critically low — supplemental oxygen may be required.",
-      time: "13d ago",
-    },
-    {
-      id: 2,
       title: "HeartRate Alert",
-      severity: "Medium",
-      status: "Acknowledged",
-      message: "Elevated heart rate consistent with respiratory distress.",
-      time: "13d ago",
+      severity: "Critical",
+      message: "Heart rate exceeded threshold (118 bpm > 110 bpm)",
+      time: "5 min ago",
+      status: "Active",
     },
   ],
+
+  2: [
+    {
+      id: 2,
+      title: "SpO2 Alert",
+      severity: "Medium",
+      message: "SpO2 dropped below threshold (93% < 94%)",
+      time: "20 min ago",
+      status: "Active",
+    },
+  ],
+
+  3: [],
+
+  4: [],
 };
 
-function DoctorAlerts() {
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+const DoctorAlerts = () => {
+  const [selectedPatient, setSelectedPatient] =
+    useState<Patient>(patients[0]);
+
   const [search, setSearch] = useState("");
-  useEffect(() => {
-    fetch("http://localhost:3001/api/patients")
-      .then((res) => res.json())
-      .then((data) => setPatients(data))
-      .catch((err) => console.error("Error fetching patients:", err));
-  }, []);
 
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      fetch(`http://localhost:3001/api/patients?search=${search}`)
-        .then((res) => res.json())
-        .then((data) => setPatients(data));
-    }, 300);
+  const [alertsData, setAlertsData] =
+    useState<Record<number, Alert[]>>(initialAlerts);
 
-    return () => clearTimeout(delay);
+  const filteredPatients = useMemo(() => {
+    return patients.filter((patient) =>
+      patient.name.toLowerCase().includes(search.toLowerCase())
+    );
   }, [search]);
 
-  const selectedAlerts = selectedPatient
-    ? mockedAlerts[selectedPatient.id] || []
-    : [];
+  const selectedAlerts =
+    alertsData[selectedPatient.id] || [];
+
+  const activeAlerts = selectedAlerts.filter(
+    (alert) => alert.status === "Active"
+  );
+
+  const handleAcknowledge = (
+    patientId: number,
+    alertId: number
+  ) => {
+    setAlertsData((prev) => ({
+      ...prev,
+      [patientId]: prev[patientId].map((alert) =>
+        alert.id === alertId
+          ? {
+              ...alert,
+              status: "Acknowledged",
+            }
+          : alert
+      ),
+    }));
+  };
 
   return (
     <div className="alerts-page">
-      <h1 className="alerts-title">Alerts Overview</h1>
+      <h1 className="alerts-title">
+        Alerts Overview
+      </h1>
 
       <div className="alerts-layout">
-        <aside className="alerts-sidebar">
-          <SearchBar
-            className="search-bar-patients"
+        <div className="alerts-sidebar">
+          <input
+            type="text"
             placeholder="Search patients..."
+            className="alerts-search"
             value={search}
-            onChange={setSearch}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
           />
+
           <div className="alerts-sidebar-header">
             <span>Patients</span>
-            <span className="patients-count">{patients.length}</span>
+
+            <span className="patients-count">
+              {filteredPatients.length}
+            </span>
           </div>
 
           <div className="alerts-patient-list">
-            {patients.map((p) => (
-              <PatientCard
-                cnp={p.cnp}
-                key={p.id}
-                name={p.name}
-                gender={p.gender}
-                age={p.age ?? "N/A"}
-                diagnosis={p.diagnosis || "No medical info"}
-                status={p.status}
-                alertsCount={p.alertsCount ?? 0}
-                variant="compact"
-                onClick={() => setSelectedPatient(p)}
-              />
-            ))}
-          </div>
-        </aside>
+            {filteredPatients.map((patient) => {
+              const patientAlerts =
+                alertsData[patient.id] || [];
 
-        <main className="alerts-details">
-          {!selectedPatient ? (
-            <div className="empty-alerts-state">
-              <div className="empty-icon">
-                <i className="bi bi-bell-slash"></i>
+              const activeCount =
+                patientAlerts.filter(
+                  (a) => a.status === "Active"
+                ).length;
+
+              return (
+                <div
+                  key={patient.id}
+                  className={`alert-patient-card ${
+                    selectedPatient.id === patient.id
+                      ? "selected"
+                      : ""
+                  }`}
+                  onClick={() =>
+                    setSelectedPatient(patient)
+                  }
+                >
+                  <div className="patient-avatar">
+                    {patient.initials}
+                  </div>
+
+                  <div className="patient-info">
+                    <h3>{patient.name}</h3>
+
+                    <p>{patient.diagnosis}</p>
+                  </div>
+
+                  {activeCount > 0 && (
+                    <div className="patient-alert-count">
+                      {activeCount}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="alerts-details">
+          <div className="alerts-content">
+            <div className="alerts-content-header">
+              <h2>
+                Alerts for{" "}
+                <span>
+                  {selectedPatient.name}
+                </span>
+              </h2>
+
+              <div className="alerts-summary">
+                <span className="active-count">
+                  {activeAlerts.length} active
+                </span>
+
+                <span className="total-count">
+                  {selectedAlerts.length} total
+                </span>
               </div>
-              <h2>No patient selected</h2>
-              <p>Select a patient from the list to view their alerts</p>
             </div>
-          ) : (
-            <div className="alerts-content">
-              <div className="alerts-content-header">
+
+            {selectedAlerts.length === 0 ? (
+              <div className="empty-alerts-state">
+                <div className="empty-icon">
+                  <i className="bi bi-check-lg"></i>
+                </div>
+
                 <h2>
-                  <i className="bi bi-bell"></i> Alerts for{" "}
-                  <span>{selectedPatient.name}</span>
+                  No alerts for this patient
                 </h2>
 
-                <div className="alerts-summary">
-                  <span className="active-count">
-                    {selectedAlerts.filter((a) => a.status === "Active").length}{" "}
-                    active
-                  </span>
-                  <span className="total-count">
-                    {selectedAlerts.length} total
-                  </span>
-                </div>
+                <p>
+                  Everything looks normal.
+                </p>
               </div>
-
-              <h3>Alerts</h3>
-
+            ) : (
               <div className="alerts-list">
-                {selectedAlerts.length === 0 ? (
-                  <p className="no-alerts-text">No alerts for this patient.</p>
-                ) : (
-                  selectedAlerts.map((alert) => (
-                    <div
-                      key={alert.id}
-                      className={`alert-card ${
-                        alert.status === "Acknowledged" ? "acknowledged" : ""
-                      }`}
-                    >
-                      <div className="alert-dot"></div>
+                {selectedAlerts.map((alert) => (
+                  <div
+                    key={alert.id}
+                    className={`alert-card ${
+                      alert.status ===
+                      "Acknowledged"
+                        ? "acknowledged"
+                        : ""
+                    }`}
+                  >
+                    <div className="alert-dot"></div>
 
-                      <div className="alert-main">
-                        <div className="alert-title-row">
-                          <strong>{alert.title}</strong>
-                          <span
-                            className={`severity ${alert.severity.toLowerCase()}`}
-                          >
-                            {alert.severity}
-                          </span>
-                          {alert.status === "Acknowledged" && (
-                            <span className="ack-badge">Acknowledged</span>
-                          )}
-                        </div>
+                    <div className="alert-main">
+                      <div className="alert-title-row">
+                        <h3>{alert.title}</h3>
 
-                        <p>{alert.message}</p>
-
-                        <span className="alert-time">
-                          <i className="bi bi-clock"></i> {alert.time}
+                        <span
+                          className={`severity ${alert.severity.toLowerCase()}`}
+                        >
+                          {alert.severity}
                         </span>
+
+                        {alert.status ===
+                          "Acknowledged" && (
+                          <span className="ack-badge">
+                            Acknowledged
+                          </span>
+                        )}
                       </div>
 
-                      {alert.status === "Active" && (
-                        <button className="ack-button">Acknowledge</button>
-                      )}
+                      <p>{alert.message}</p>
+
+                      <span className="alert-time">
+                        {alert.time}
+                      </span>
                     </div>
-                  ))
-                )}
+
+                    {alert.status === "Active" && (
+                      <button
+                        className="ack-button"
+                        onClick={() =>
+                          handleAcknowledge(
+                            selectedPatient.id,
+                            alert.id
+                          )
+                        }
+                      >
+                        Acknowledge
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
-            </div>
-          )}
-        </main>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default DoctorAlerts;

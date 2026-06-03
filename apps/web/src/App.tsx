@@ -14,6 +14,7 @@ import PatientDetails from "./pages/PatientDetails";
 import HomePagePatient from "./pages/HomePagePatient";
 import AddPatient from "./pages/AddPatient";
 import Settings from "./pages/Settings";
+import PatientSettings from "./pages/PatientSettings";
 
 import "bootstrap-icons/font/bootstrap-icons.css";
 
@@ -86,6 +87,11 @@ function App() {
         <Route
           path="recommendations"
           element={<Recommendations />}
+        />
+
+        <Route
+          path="settings"
+          element={<PatientSettings />}
         />
       </Route>
     </Routes>

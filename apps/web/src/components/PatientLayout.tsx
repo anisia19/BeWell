@@ -78,6 +78,13 @@ const PatientLayout = () => {
                   </span>
                 )}
               </NavLink>
+
+              <NavLink
+                to="/patient/dashboard/settings"
+                className="sidebar-link"
+              >
+                Settings
+              </NavLink>
             </VStack>
           </div>
 

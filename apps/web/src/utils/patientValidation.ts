@@ -23,14 +23,5 @@ export const validatePatientForm = (form: PatientForm): FormErrors => {
     errors.cnp = "CNP must have exactly 13 digits";
   }
 
-  if (!form.dateOfBirth) {
-    errors.dateOfBirth = "Date of birth is required";
-  }
-
-  const age = Number(form.age);
-  if (!age || age < 1 || age > 120) {
-    errors.age = "Age must be between 1 and 120";
-  }
-
   return errors;
 };

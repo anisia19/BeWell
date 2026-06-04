@@ -1,12 +1,74 @@
 import bcrypt from "bcryptjs";
 import pool from "../config/db.js";
 
-const generatePassword = (cnp, lastName) => {
-    const last4Cnp = cnp.slice(-4);
-    const randomChars = Math.random().toString(36).substring(2, 4);
-    return `${last4Cnp}${lastName}${randomChars}`;
+const generateRandomChars = (length = 4) => {
+    return Math.random().toString(36).substring(2, 2 + length);
 };
 
+const generatePassword = (cnp, lastName) => {
+    const last4Cnp = cnp.slice(-4);
+    const cleanLastName = lastName.trim().replace(/\s+/g, "");
+    const randomChars = generateRandomChars(4);
+
+    return `${cleanLastName}${last4Cnp}${randomChars}`;
+};
+
+const getBirthDateFromRomanianCnp = (cnp) => {
+    if (!/^\d{13}$/.test(cnp)) {
+        throw new Error("Invalid CNP");
+    }
+
+    const genderDigit = Number(cnp[0]);
+    const year = Number(cnp.slice(1, 3));
+    const month = Number(cnp.slice(3, 5));
+    const day = Number(cnp.slice(5, 7));
+
+    let fullYear;
+
+    if (genderDigit === 1 || genderDigit === 2) {
+        fullYear = 1900 + year;
+    } else if (genderDigit === 3 || genderDigit === 4) {
+        fullYear = 1800 + year;
+    } else if (genderDigit === 5 || genderDigit === 6) {
+        fullYear = 2000 + year;
+    } else if (genderDigit === 7 || genderDigit === 8 || genderDigit === 9) {
+        fullYear = 2000 + year;
+    } else {
+        throw new Error("Invalid CNP first digit");
+    }
+
+    const date = new Date(fullYear, month - 1, day);
+
+    if (
+        date.getFullYear() !== fullYear ||
+        date.getMonth() !== month - 1 ||
+        date.getDate() !== day
+    ) {
+        throw new Error("Invalid CNP birth date");
+    }
+
+    return date;
+};
+
+const calculateAge = (birthDate) => {
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+
+    const hasBirthdayPassed =
+        today.getMonth() > birthDate.getMonth() ||
+        (today.getMonth() === birthDate.getMonth() &&
+            today.getDate() >= birthDate.getDate());
+
+    if (!hasBirthdayPassed) {
+        age--;
+    }
+
+    return age;
+};
+
+const formatDateForMySQL = (date) => {
+    return date.toISOString().split("T")[0];
+};
 export const getPatients = async() => {
     const [rows] = await pool.execute(`
     SELECT 
@@ -38,8 +100,6 @@ export const createPatient = async(data) => {
         lastName,
         phone,
         cnp,
-        dateOfBirth,
-        age,
         gender,
         profession,
         workplace,
@@ -70,6 +130,10 @@ export const createPatient = async(data) => {
             error.code = "DUPLICATE_CNP";
             throw error;
         }
+
+        const birthDate = getBirthDateFromRomanianCnp(cnp);
+        const dateOfBirth = formatDateForMySQL(birthDate);
+        const age = calculateAge(birthDate);
 
         const plainPassword = generatePassword(cnp, lastName);
         const passwordHash = await bcrypt.hash(plainPassword, 10);

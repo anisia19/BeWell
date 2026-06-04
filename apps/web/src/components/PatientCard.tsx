@@ -104,7 +104,6 @@ function PatientCard({
         </HStack>
       </CardBody>
     </Card>
-    // start task
   );
 }
 

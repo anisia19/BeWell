@@ -59,14 +59,74 @@ const AdminDashboard = () => {
         });
       });
   }, [toast]);
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
+    const { name, value } = e.target;
+
+    if (name === "cnp") {
+      const birthData = extractBirthDataFromCnp(value);
+
+      setForm((prev) => ({
+        ...prev,
+        cnp: value,
+        dateOfBirth: birthData?.birthDate || "",
+        age: birthData?.age || "",
+      }));
+
+      return;
+    }
+
     setForm((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
+  };
+
+  const extractBirthDataFromCnp = (cnp: string) => {
+    if (cnp.length < 7) {
+      return null;
+    }
+
+    const s = Number(cnp[0]);
+    const yy = Number(cnp.substring(1, 3));
+    const mm = Number(cnp.substring(3, 5));
+    const dd = Number(cnp.substring(5, 7));
+
+    let year = 0;
+
+    if (s === 1 || s === 2) {
+      year = 1900 + yy;
+    } else if (s === 5 || s === 6) {
+      year = 2000 + yy;
+    } else if (s === 3 || s === 4) {
+      year = 1800 + yy;
+    } else {
+      return null;
+    }
+
+    const birthDate = `${year}-${String(mm).padStart(2, "0")}-${String(
+      dd
+    ).padStart(2, "0")}`;
+
+    const today = new Date();
+    const birth = new Date(year, mm - 1, dd);
+
+    let age = today.getFullYear() - birth.getFullYear();
+
+    const hasBirthdayPassed =
+      today.getMonth() > birth.getMonth() ||
+      (today.getMonth() === birth.getMonth() &&
+        today.getDate() >= birth.getDate());
+
+    if (!hasBirthdayPassed) {
+      age--;
+    }
+
+    return {
+      birthDate,
+      age: age.toString(),
+    };
   };
 
   const handleSubmit = async () => {
@@ -152,19 +212,14 @@ const AdminDashboard = () => {
             type="date"
             name="dateOfBirth"
             value={form.dateOfBirth}
-            onChange={handleChange}
+            readOnly
           />
           <FormErrorMessage>{errors.dateOfBirth}</FormErrorMessage>
         </FormControl>
 
         <FormControl isInvalid={!!errors.age}>
           <FormLabel>Age</FormLabel>
-          <Input
-            name="age"
-            type="number"
-            value={form.age}
-            onChange={handleChange}
-          />
+          <Input name="age" type="number" value={form.age} readOnly />
           <FormErrorMessage>{errors.age}</FormErrorMessage>
         </FormControl>
 

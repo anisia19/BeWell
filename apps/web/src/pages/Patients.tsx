@@ -77,7 +77,9 @@ function Patients() {
             age={p.age ?? "N/A"}
             diagnosis={p.diagnosis || "No medical info added"}
             status={p.status}
-            onClick={() => navigate(`/doctor/patient-details/${p.id}`)}
+            onClick={() =>
+              navigate(`/doctor/dashboard/patient-details/${p.id}`)
+            }
           />
         ))}
       </div>

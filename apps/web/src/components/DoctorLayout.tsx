@@ -22,7 +22,7 @@ const DoctorLayout = () => {
         </Stack>
       </GridItem>
 
-      <GridItem bg="gray.50" p={6}>
+      <GridItem bg="gray.50" p={6} minW="0" h="100vh" overflowY="auto">
         <Outlet />
       </GridItem>
     </Grid>

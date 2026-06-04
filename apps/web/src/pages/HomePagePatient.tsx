@@ -1,9 +1,7 @@
-import PatientGraph from "../components/PatientGraph";
+import AllChartsData from "../components/AllChartsData";
 
 const HomePagePatient = () => {
-  console.log("HomePagePatient rendered");
-
-  return <PatientGraph></PatientGraph>;
+  return <div><AllChartsData /></div>;
 };
 
 export default HomePagePatient;

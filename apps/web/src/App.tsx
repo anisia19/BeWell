@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import DoctorLayout from "./components/DoctorLayout";
 import ProtectedPatientLayout from "./components/ProtectedPatientLayout";
+import ProtectedAdminLayout from "./components/ProtectedAdminLayout";
 
 import Patients from "./pages/Patients";
 import DoctorAlerts from "./pages/DoctorAlerts";
@@ -21,6 +22,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 // --- IMPORTURI NOI ---
 import ForgotPassword from "./pages/ForgotPassword.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
+import AdminDashboard from "./pages/AdminDashboard.tsx";
 
 function App() {
   return (
@@ -58,9 +60,11 @@ function App() {
 
         <Route path="settings" element={<PatientSettings />} />
       </Route>
-    </Routes>
 
-    // mai trebuie sa adaugam admin dashboard-ul
+      <Route path="/admin/dashboard" element={<ProtectedAdminLayout />}>
+        <Route index element={<AdminDashboard />} />
+      </Route>
+    </Routes>
   );
 }
 

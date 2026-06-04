@@ -1,68 +1,237 @@
 import {
   Box,
   Button,
-  HStack,
-  Input,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableContainer,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Grid,
   Heading,
+  Input,
+  Select,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+  useToast,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { FormErrors, Patient, PatientForm } from "../types/patient";
+import { createPatient, getPatients } from "../../services/adminPatientApi";
+import { validatePatientForm } from "../utils/patientValidation";
+
+const emptyForm: PatientForm = {
+  email: "",
+  firstName: "",
+  lastName: "",
+  phone: "",
+  cnp: "",
+  dateOfBirth: "",
+  age: "",
+  gender: "UNSPECIFIED",
+  profession: "",
+  workplace: "",
+};
 
 const AdminDashboard = () => {
-  const [search, setSearch] = useState("");
+  const toast = useToast();
+
+  const [form, setForm] = useState<PatientForm>(emptyForm);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    getPatients()
+      .then(setPatients)
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: "Could not load patients",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      });
+  }, [toast]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setForm((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    const validationErrors = validatePatientForm(form);
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) return;
+
+    try {
+      setIsSubmitting(true);
+
+      const createdPatient = await createPatient(form);
+
+      setPatients((prev) => [createdPatient, ...prev]);
+      setForm(emptyForm);
+      setErrors({});
+
+      toast({
+        title: "Patient created",
+        description: `Generated password: ${createdPatient.generatedPassword}`,
+        status: "success",
+        duration: 7000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Could not create patient",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Box p={8}>
-      <Heading size="lg" mb={6}>
-        Admin Dashboard
-      </Heading>
+      <Grid templateColumns="repeat(3, 1fr)" gap={4} mb={6}>
+        <FormControl isInvalid={!!errors.email}>
+          <FormLabel>Email</FormLabel>
+          <Input name="email" value={form.email} onChange={handleChange} />
+          <FormErrorMessage>{errors.email}</FormErrorMessage>
+        </FormControl>
 
-      <HStack mb={6} spacing={4}>
-        <Input
-          placeholder="Search patient..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          maxW="300px"
-        />
+        <FormControl isInvalid={!!errors.firstName}>
+          <FormLabel>First Name</FormLabel>
+          <Input
+            name="firstName"
+            value={form.firstName}
+            onChange={handleChange}
+          />
+          <FormErrorMessage>{errors.firstName}</FormErrorMessage>
+        </FormControl>
 
-        <Button colorScheme="green">Add Patient</Button>
-      </HStack>
+        <FormControl isInvalid={!!errors.lastName}>
+          <FormLabel>Last Name</FormLabel>
+          <Input
+            name="lastName"
+            value={form.lastName}
+            onChange={handleChange}
+          />
+          <FormErrorMessage>{errors.lastName}</FormErrorMessage>
+        </FormControl>
+
+        <FormControl isInvalid={!!errors.phone}>
+          <FormLabel>Phone</FormLabel>
+          <Input name="phone" value={form.phone} onChange={handleChange} />
+          <FormErrorMessage>{errors.phone}</FormErrorMessage>
+        </FormControl>
+
+        <FormControl isInvalid={!!errors.cnp}>
+          <FormLabel>CNP</FormLabel>
+          <Input name="cnp" value={form.cnp} onChange={handleChange} />
+          <FormErrorMessage>{errors.cnp}</FormErrorMessage>
+        </FormControl>
+
+        <FormControl isInvalid={!!errors.dateOfBirth}>
+          <FormLabel>Date of Birth</FormLabel>
+          <Input
+            type="date"
+            name="dateOfBirth"
+            value={form.dateOfBirth}
+            onChange={handleChange}
+          />
+          <FormErrorMessage>{errors.dateOfBirth}</FormErrorMessage>
+        </FormControl>
+
+        <FormControl isInvalid={!!errors.age}>
+          <FormLabel>Age</FormLabel>
+          <Input
+            name="age"
+            type="number"
+            value={form.age}
+            onChange={handleChange}
+          />
+          <FormErrorMessage>{errors.age}</FormErrorMessage>
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>Gender</FormLabel>
+          <Select name="gender" value={form.gender} onChange={handleChange}>
+            <option value="UNSPECIFIED">UNSPECIFIED</option>
+            <option value="FEMALE">FEMALE</option>
+            <option value="MALE">MALE</option>
+          </Select>
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>Profession</FormLabel>
+          <Input
+            name="profession"
+            value={form.profession}
+            onChange={handleChange}
+          />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>Workplace</FormLabel>
+          <Input
+            name="workplace"
+            value={form.workplace}
+            onChange={handleChange}
+          />
+        </FormControl>
+      </Grid>
+
+      <Button
+        colorScheme="green"
+        onClick={handleSubmit}
+        isLoading={isSubmitting}
+        mb={8}
+      >
+        Add Patient
+      </Button>
 
       <TableContainer>
         <Table variant="simple">
           <Thead>
             <Tr>
-              <Th>ID</Th>
-              <Th>First Name</Th>
-              <Th>Last Name</Th>
               <Th>Email</Th>
-              <Th>Actions</Th>
+              <Th>Name</Th>
+              <Th>Phone</Th>
+              <Th>CNP</Th>
+              <Th>Age</Th>
+              <Th>Gender</Th>
+              <Th>Profession</Th>
+              <Th>Workplace</Th>
             </Tr>
           </Thead>
 
           <Tbody>
-            <Tr>
-              <Td>1</Td>
-              <Td>John</Td>
-              <Td>Doe</Td>
-              <Td>john@example.com</Td>
-              <Td>
-                <HStack spacing={2}>
-                  <Button size="sm" colorScheme="blue">
-                    Edit
-                  </Button>
-                  <Button size="sm" colorScheme="red">
-                    Delete
-                  </Button>
-                </HStack>
-              </Td>
-            </Tr>
+            {patients.map((patient) => (
+              <Tr key={patient.patientId}>
+                <Td>{patient.email}</Td>
+                <Td>
+                  {patient.firstName} {patient.lastName}
+                </Td>
+                <Td>{patient.phone}</Td>
+                <Td>{patient.cnp}</Td>
+                <Td>{patient.age}</Td>
+                <Td>{patient.gender}</Td>
+                <Td>{patient.profession || "-"}</Td>
+                <Td>{patient.workplace || "-"}</Td>
+              </Tr>
+            ))}
           </Tbody>
         </Table>
       </TableContainer>

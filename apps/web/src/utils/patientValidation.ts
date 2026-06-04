@@ -1,0 +1,36 @@
+import type { FormErrors, PatientForm } from "../types/patient";
+
+export const validatePatientForm = (form: PatientForm): FormErrors => {
+  const errors: FormErrors = {};
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    errors.email = "Invalid email";
+  }
+
+  if (!form.firstName.trim()) {
+    errors.firstName = "First name is required";
+  }
+
+  if (!form.lastName.trim()) {
+    errors.lastName = "Last name is required";
+  }
+
+  if (!/^07\d{8}$/.test(form.phone)) {
+    errors.phone = "Phone must start with 07 and have 10 digits";
+  }
+
+  if (!/^\d{13}$/.test(form.cnp)) {
+    errors.cnp = "CNP must have exactly 13 digits";
+  }
+
+  if (!form.dateOfBirth) {
+    errors.dateOfBirth = "Date of birth is required";
+  }
+
+  const age = Number(form.age);
+  if (!age || age < 1 || age > 120) {
+    errors.age = "Age must be between 1 and 120";
+  }
+
+  return errors;
+};

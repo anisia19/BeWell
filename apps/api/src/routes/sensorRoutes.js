@@ -12,9 +12,9 @@ router.post('/', async (req, res) => {
 
     await db.query(
       `INSERT INTO sensor_readings 
-        (patient_id, ecg, temperature, humidity, pulse, recorded_at) 
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [patient_id, ecg, temperature, humidity, pulse, recorded_at || new Date()]
+        (patient_id, wearable_device_id, ecg_value, temperature_value, humidity_value, pulse_value, recorded_at, aggregation_window_seconds) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [patient_id, 1, ecg, temperature, humidity, pulse, recorded_at || new Date(), 30]
     );
 
     res.json({ success: true });

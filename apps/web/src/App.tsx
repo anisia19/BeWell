@@ -38,27 +38,19 @@ function App() {
 
       <Route path="/reset-password" element={<ResetPassword />} />
 
-      <Route path="/doctor/dashboard" element={<ProtectedPatientLayout />}>
+      <Route path="/doctor/dashboard" element={<ProtectedDoctorLayout />}>
         <Route index element={<Navigate to="patients" replace />} />
-
         <Route path="patients" element={<Patients />} />
-
         <Route path="alerts" element={<DoctorAlerts />} />
-
         <Route path="settings" element={<Settings />} />
-
         <Route path="patient-details/:id" element={<PatientDetails />} />
-
         <Route path="add-patient" element={<AddPatient />} />
       </Route>
 
-      <Route path="/patient/dashboard" element={<ProtectedDoctorLayout />}>
+      <Route path="/patient/dashboard" element={<ProtectedPatientLayout />}>
         <Route index element={<HomePagePatient />} />
-
         <Route path="alerts" element={<PatientAlerts />} />
-
         <Route path="recommendations" element={<Recommendations />} />
-
         <Route path="settings" element={<PatientSettings />} />
       </Route>
 

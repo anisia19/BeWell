@@ -12,61 +12,46 @@ type Recommendation = {
 const PatientDetails = () => {
   const { id } = useParams();
 
-  const [activeTab, setActiveTab] =
-    useState("overview");
+  const [activeTab, setActiveTab] = useState("overview");
 
-  const [recommendations, setRecommendations] =
-    useState<Recommendation[]>([]);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
 
-  const [showForm, setShowForm] =
-    useState(false);
+  const [showForm, setShowForm] = useState(false);
 
   const [title, setTitle] = useState("");
 
   const [text, setText] = useState("");
 
   useEffect(() => {
-    fetch(
-      `http://localhost:3001/api/recommendations/${id}`
-    )
+    fetch(`http://localhost:3001/api/recommendations/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setRecommendations(data);
       })
-      .catch((err) =>
-        console.error(
-          "Error fetching recommendations:",
-          err
-        )
-      );
+      .catch((err) => console.error("Error fetching recommendations:", err));
   }, [id]);
 
   const addRecommendation = async () => {
     if (!title || !text) return;
 
     try {
-      await fetch(
-        "http://localhost:3001/api/recommendations",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
+      await fetch("http://localhost:3001/api/recommendations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-          body: JSON.stringify({
-            patient_id: Number(id),
-            recommendation_type: title,
-            daily_duration_minutes: 30,
-            instructions: text,
-          }),
-        }
+        body: JSON.stringify({
+          patient_id: Number(id),
+          recommendation_type: title,
+          daily_duration_minutes: 30,
+          instructions: text,
+        }),
+      });
+
+      const updated = await fetch(
+        `http://localhost:3001/api/recommendations/${id}`
       );
-
-      const updated =
-        await fetch(
-          `http://localhost:3001/api/recommendations/${id}`
-        );
 
       const data = await updated.json();
 
@@ -77,10 +62,7 @@ const PatientDetails = () => {
 
       setShowForm(false);
     } catch (err) {
-      console.error(
-        "Error adding recommendation:",
-        err
-      );
+      console.error("Error adding recommendation:", err);
     }
   };
 
@@ -90,66 +72,37 @@ const PatientDetails = () => {
         <div>
           <h1>Alexandra Chiriac</h1>
 
-          <p>
-            Hypertension • 23 years old
-          </p>
+          <p>Hypertension • 23 years old</p>
         </div>
 
-        <span className="patient-status">
-          Active
-        </span>
+        <span className="patient-status">Active</span>
       </div>
 
       <div className="tabs-container">
         <button
-          className={
-            activeTab === "overview"
-              ? "tab active"
-              : "tab"
-          }
-          onClick={() =>
-            setActiveTab("overview")
-          }
+          className={activeTab === "overview" ? "tab active" : "tab"}
+          onClick={() => setActiveTab("overview")}
         >
           Overview
         </button>
 
         <button
-          className={
-            activeTab === "alerts"
-              ? "tab active"
-              : "tab"
-          }
+          className={activeTab === "alerts" ? "tab active" : "tab"}
           onClick={() => setActiveTab("alerts")}
         >
           Alerts
         </button>
 
         <button
-          className={
-            activeTab ===
-            "recommendations"
-              ? "tab active"
-              : "tab"
-          }
-          onClick={() =>
-            setActiveTab(
-              "recommendations"
-            )
-          }
+          className={activeTab === "recommendations" ? "tab active" : "tab"}
+          onClick={() => setActiveTab("recommendations")}
         >
           Recommendations
         </button>
 
         <button
-          className={
-            activeTab === "thresholds"
-              ? "tab active"
-              : "tab"
-          }
-          onClick={() =>
-            setActiveTab("thresholds")
-          }
+          className={activeTab === "thresholds" ? "tab active" : "tab"}
+          onClick={() => setActiveTab("thresholds")}
         >
           Thresholds
         </button>
@@ -160,25 +113,19 @@ const PatientDetails = () => {
           <div className="details-card">
             <h2>Heart Rate</h2>
 
-            <p className="big-value">
-              78 BPM
-            </p>
+            <p className="big-value">78 BPM</p>
           </div>
 
           <div className="details-card">
             <h2>SpO2</h2>
 
-            <p className="big-value">
-              98%
-            </p>
+            <p className="big-value">98%</p>
           </div>
 
           <div className="details-card">
             <h2>Temperature</h2>
 
-            <p className="big-value">
-              36.8°C
-            </p>
+            <p className="big-value">36.8°C</p>
           </div>
         </div>
       )}
@@ -191,18 +138,12 @@ const PatientDetails = () => {
         </div>
       )}
 
-      {activeTab ===
-        "recommendations" && (
+      {activeTab === "recommendations" && (
         <div className="section-card">
           <div className="recommendations-header">
             <h2>Recommendations</h2>
 
-            <button
-              className="new-btn"
-              onClick={() =>
-                setShowForm(true)
-              }
-            >
+            <button className="new-btn" onClick={() => setShowForm(true)}>
               + New
             </button>
           </div>
@@ -213,72 +154,37 @@ const PatientDetails = () => {
                 type="text"
                 placeholder="Recommendation title"
                 value={title}
-                onChange={(e) =>
-                  setTitle(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setTitle(e.target.value)}
               />
 
               <textarea
                 placeholder="Write recommendation..."
                 value={text}
-                onChange={(e) =>
-                  setText(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setText(e.target.value)}
               />
 
-              <button
-                onClick={
-                  addRecommendation
-                }
-              >
-                Add Recommendation
-              </button>
+              <button onClick={addRecommendation}>Add Recommendation</button>
             </div>
           )}
 
-          {recommendations.length ===
-          0 ? (
+          {recommendations.length === 0 ? (
             <div className="empty-recommendations">
               <i className="bi bi-clipboard2-heart"></i>
 
-              <p>
-                No recommendations yet.
-              </p>
+              <p>No recommendations yet.</p>
             </div>
           ) : (
-            recommendations.map(
-              (recommendation) => (
-                <div
-                  className="recommendation-item"
-                  key={
-                    recommendation.id
-                  }
-                >
-                  <h3>
-                    {
-                      recommendation.recommendation_type
-                    }
-                  </h3>
+            recommendations.map((recommendation) => (
+              <div className="recommendation-item" key={recommendation.id}>
+                <h3>{recommendation.recommendation_type}</h3>
 
-                  <p>
-                    {
-                      recommendation.instructions
-                    }
-                  </p>
+                <p>{recommendation.instructions}</p>
 
-                  <span className="recommendation-doctor">
-                    Added by{" "}
-                    {
-                      recommendation.doctor_name
-                    }
-                  </span>
-                </div>
-              )
-            )
+                <span className="recommendation-doctor">
+                  Added by {recommendation.doctor_name}
+                </span>
+              </div>
+            ))
           )}
         </div>
       )}
@@ -287,9 +193,7 @@ const PatientDetails = () => {
         <div className="section-card">
           <h2>Thresholds</h2>
 
-          <p>
-            Heart Rate max: 110 BPM
-          </p>
+          <p>Heart Rate max: 110 BPM</p>
 
           <p>SpO2 min: 94%</p>
         </div>

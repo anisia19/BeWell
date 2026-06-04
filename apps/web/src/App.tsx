@@ -18,6 +18,10 @@ import PatientSettings from "./pages/PatientSettings";
 
 import "bootstrap-icons/font/bootstrap-icons.css";
 
+// --- IMPORTURI NOI ---
+import ForgotPassword from "./pages/ForgotPassword.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
+
 function App() {
   return (
     <Routes>
@@ -25,74 +29,30 @@ function App() {
 
       <Route path="/login" element={<Login />} />
 
-      <Route
-        path="/register"
-        element={<RegisterPage />}
-      />
+      <Route path="/register" element={<RegisterPage />} />
 
-      <Route
-        path="/doctor/dashboard"
-        element={<DoctorLayout />}
-      >
-        <Route
-          index
-          element={
-            <Navigate
-              to="patients"
-              replace
-            />
-          }
-        />
+      <Route path="/doctor/dashboard" element={<DoctorLayout />}>
+        <Route index element={<Navigate to="patients" replace />} />
 
-        <Route
-          path="patients"
-          element={<Patients />}
-        />
+        <Route path="patients" element={<Patients />} />
 
-        <Route
-          path="alerts"
-          element={<DoctorAlerts />}
-        />
+        <Route path="alerts" element={<DoctorAlerts />} />
 
-        <Route
-          path="settings"
-          element={<Settings />}
-        />
+        <Route path="settings" element={<Settings />} />
 
-        <Route
-          path="patient-details/:id"
-          element={<PatientDetails />}
-        />
+        <Route path="patient-details/:id" element={<PatientDetails />} />
 
-        <Route
-          path="add-patient"
-          element={<AddPatient />}
-        />
+        <Route path="add-patient" element={<AddPatient />} />
       </Route>
 
-      <Route
-        path="/patient/dashboard"
-        element={<ProtectedPatientLayout />}
-      >
-        <Route
-          index
-          element={<HomePagePatient />}
-        />
+      <Route path="/patient/dashboard" element={<ProtectedPatientLayout />}>
+        <Route index element={<HomePagePatient />} />
 
-        <Route
-          path="alerts"
-          element={<PatientAlerts />}
-        />
+        <Route path="alerts" element={<PatientAlerts />} />
 
-        <Route
-          path="recommendations"
-          element={<Recommendations />}
-        />
+        <Route path="recommendations" element={<Recommendations />} />
 
-        <Route
-          path="settings"
-          element={<PatientSettings />}
-        />
+        <Route path="settings" element={<PatientSettings />} />
       </Route>
     </Routes>
   );

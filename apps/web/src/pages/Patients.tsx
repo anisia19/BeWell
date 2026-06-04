@@ -19,9 +19,7 @@ type Patient = {
 function Patients() {
   const navigate = useNavigate();
 
-  const [patients, setPatients] = useState<
-    Patient[]
-  >([]);
+  const [patients, setPatients] = useState<Patient[]>([]);
 
   const [search, setSearch] = useState("");
 
@@ -31,19 +29,12 @@ function Patients() {
       .then((data) => {
         setPatients(data);
       })
-      .catch((err) =>
-        console.error(
-          "Error fetching patients:",
-          err
-        )
-      );
+      .catch((err) => console.error("Error fetching patients:", err));
   }, []);
 
   useEffect(() => {
     const delay = setTimeout(() => {
-      fetch(
-        `http://localhost:3001/api/patients?search=${search}`
-      )
+      fetch(`http://localhost:3001/api/patients?search=${search}`)
         .then((res) => res.json())
         .then((data) => setPatients(data));
     }, 300);
@@ -62,21 +53,14 @@ function Patients() {
           <Button
             variant="solid"
             colorScheme="green"
-            onClick={() =>
-              navigate(
-                "/doctor/dashboard/add-patient"
-              )
-            }
+            onClick={() => navigate("/doctor/dashboard/add-patient")}
           >
             <i className="bi bi-person-add button-icon-spacing"></i>
-
             Add Patient
           </Button>
         </div>
 
-        <Text fontSize="xs">
-          {patients.length} total patients
-        </Text>
+        <Text fontSize="xs">{patients.length} total patients</Text>
       </div>
 
       <div className="search-bar-patients">
@@ -97,15 +81,10 @@ function Patients() {
             name={p.name}
             gender={p.gender}
             age={p.age ?? "N/A"}
-            diagnosis={
-              p.diagnosis ||
-              "No medical info added"
-            }
+            diagnosis={p.diagnosis || "No medical info added"}
             status={p.status}
             onClick={() =>
-              navigate(
-                `/doctor/dashboard/patient-details/${p.id}`
-              )
+              navigate(`/doctor/dashboard/patient-details/${p.id}`)
             }
           />
         ))}

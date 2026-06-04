@@ -43,6 +43,7 @@ export const createPatient = async(data) => {
         gender,
         profession,
         workplace,
+        role,
     } = data;
 
     const connection = await pool.getConnection();
@@ -77,9 +78,9 @@ export const createPatient = async(data) => {
             `
       INSERT INTO users 
         (email, password_hash, role, first_name, last_name, phone, is_active)
-      VALUES 
-        (?, ?, 'PATIENT', ?, ?, ?, 1)
-      `, [email, passwordHash, firstName, lastName, phone]
+        VALUES 
+        (?, ?, ?, ?, ?, ?, 1)
+      `, [email, passwordHash, role, firstName, lastName, phone]
         );
 
         const userId = userResult.insertId;

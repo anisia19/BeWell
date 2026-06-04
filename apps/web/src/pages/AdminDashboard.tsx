@@ -5,8 +5,10 @@ import {
   FormErrorMessage,
   FormLabel,
   Grid,
-  Heading,
   Input,
+  Radio,
+  RadioGroup,
+  HStack,
   Select,
   Table,
   TableContainer,
@@ -33,6 +35,7 @@ const emptyForm: PatientForm = {
   gender: "UNSPECIFIED",
   profession: "",
   workplace: "",
+  role: "PATIENT",
 };
 
 const AdminDashboard = () => {
@@ -190,6 +193,26 @@ const AdminDashboard = () => {
             value={form.workplace}
             onChange={handleChange}
           />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>Role</FormLabel>
+
+          <RadioGroup
+            value={form.role}
+            onChange={(value) =>
+              setForm((prev) => ({
+                ...prev,
+                role: value as "PATIENT" | "DOCTOR" | "ADMIN",
+              }))
+            }
+          >
+            <HStack spacing={6}>
+              <Radio value="PATIENT">Patient</Radio>
+              <Radio value="DOCTOR">Doctor</Radio>
+              <Radio value="ADMIN">Admin</Radio>
+            </HStack>
+          </RadioGroup>
         </FormControl>
       </Grid>
 

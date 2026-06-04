@@ -23,6 +23,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import ForgotPassword from "./pages/ForgotPassword.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
+import ProtectedDoctorLayout from "./components/ProtectedDoctorLayout.tsx";
 
 function App() {
   return (
@@ -37,7 +38,7 @@ function App() {
 
       <Route path="/reset-password" element={<ResetPassword />} />
 
-      <Route path="/doctor/dashboard" element={<DoctorLayout />}>
+      <Route path="/doctor/dashboard" element={<ProtectedPatientLayout />}>
         <Route index element={<Navigate to="patients" replace />} />
 
         <Route path="patients" element={<Patients />} />
@@ -51,7 +52,7 @@ function App() {
         <Route path="add-patient" element={<AddPatient />} />
       </Route>
 
-      <Route path="/patient/dashboard" element={<ProtectedPatientLayout />}>
+      <Route path="/patient/dashboard" element={<ProtectedDoctorLayout />}>
         <Route index element={<HomePagePatient />} />
 
         <Route path="alerts" element={<PatientAlerts />} />

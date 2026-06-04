@@ -1,35 +1,49 @@
-import { Grid, GridItem, Text, VStack, Stack } from "@chakra-ui/react";
-import { NavLink, Outlet } from "react-router-dom";
-import "./Layout.css";
-import SideBarProfile from "./SideBarProfile";
+import { Outlet, Link } from "react-router-dom";
 
 const DoctorLayout = () => {
   return (
-    <Grid templateColumns="250px 1fr" minH="100vh">
-      <GridItem className="sidebar" p={4}>
-        <Stack h="100%" justify="space-between">
-          <div>
-            <Text fontWeight="bold" mb={4} fontSize="xl">
-              BeWell
-            </Text>
+    <div style={{ display: "flex", minHeight: "100vh" }}>
+      <aside
+        style={{
+          width: "250px",
+          background: "#1e293b",
+          color: "white",
+          padding: "1rem",
+        }}
+      >
+        <h2>Doctor Panel</h2>
 
-            <VStack align="start" spacing={3}>
-              <NavLink to="/doctor/dashboard/patients">Patients</NavLink>
+        <nav>
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            <li>
+              <Link to="/doctor/dashboard">Dashboard</Link>
+            </li>
 
-              <NavLink to="/doctor/dashboard/alerts">Alerts</NavLink>
+            <li>
+              <Link to="/doctor/dashboard/patients">Patients</Link>
+            </li>
 
-              <NavLink to="/doctor/dashboard/settings">Settings</NavLink>
-            </VStack>
-          </div>
+            <li>
+              <Link to="/doctor/dashboard/appointments">Appointments</Link>
+            </li>
 
-          <SideBarProfile />
-        </Stack>
-      </GridItem>
+            <li>
+              <Link to="/doctor/dashboard/recommendations">
+                Recommendations
+              </Link>
+            </li>
 
-      <GridItem p={0}>
+            <li>
+              <Link to="/doctor/dashboard/settings">Settings</Link>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main style={{ flex: 1, padding: "2rem" }}>
         <Outlet />
-      </GridItem>
-    </Grid>
+      </main>
+    </div>
   );
 };
 

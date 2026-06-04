@@ -22,6 +22,7 @@ const LoginForm = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>();
+
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -34,9 +35,12 @@ const LoginForm = () => {
         },
         body: JSON.stringify(data),
       });
+
       const result = await response.json();
+
       if (response.ok) {
         localStorage.setItem("user", JSON.stringify(result.user));
+
         toast({
           title: "Autentificare reușită!",
           description: "Bine ai revenit la BeWell.",
@@ -45,12 +49,17 @@ const LoginForm = () => {
           isClosable: true,
         });
 
-        // Navighează în funcție de rol
-        const redirectPath =
-          result.user.role === "PATIENT"
-            ? "/patient/dashboard"
-            : "/doctor/dashboard";
-        navigate(redirectPath);
+        const role = result.user.role;
+
+        if (role === "ADMIN") {
+          navigate("/admin/dashboard");
+        } else if (role === "DOCTOR") {
+          navigate("/doctor/dashboard");
+        } else if (role === "PATIENT") {
+          navigate("/patient/dashboard");
+        } else {
+          navigate("/login");
+        }
       } else {
         toast({
           title: "Eroare",
@@ -97,20 +106,21 @@ const LoginForm = () => {
             />
             <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
           </FormControl>
-           {/* --- MUTĂ CODUL AICI, SUB FORMCONTROL --- */}
+
           <div style={{ width: "100%", textAlign: "right", marginTop: "-8px" }}>
-            <Link 
-              to="/forgot-password" 
-              style={{ 
-                color: "#22c55e", 
-                fontWeight: "600", 
+            <Link
+              to="/forgot-password"
+              style={{
+                color: "#22c55e",
+                fontWeight: "600",
                 fontSize: "14px",
-                textDecoration: "none" 
+                textDecoration: "none",
               }}
             >
               Forgot Password?
             </Link>
           </div>
+
           <Button type="submit" isLoading={isSubmitting}>
             Log in
           </Button>

@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import AdminLayout from "./AdminLayout";
+import DoctorLayout from "./DoctorLayout";
 
-const ProtectedAdminLayout = () => {
+const ProtectedDoctorLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -17,7 +17,7 @@ const ProtectedAdminLayout = () => {
     try {
       const user = JSON.parse(userJson);
 
-      if (user.role !== "ADMIN") {
+      if (user.role !== "DOCTOR") {
         navigate("/login", { replace: true, state: { from: location } });
         return;
       }
@@ -27,7 +27,7 @@ const ProtectedAdminLayout = () => {
     }
   }, [location, navigate]);
 
-  return <AdminLayout />;
+  return <DoctorLayout />;
 };
 
-export default ProtectedAdminLayout;
+export default ProtectedDoctorLayout;

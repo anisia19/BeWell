@@ -54,56 +54,69 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// POST /api/auth/register
-router.post('/register', async (req, res) => {
+// POST /api/auth/reset-password
+router.post('/reset-password', async (req, res) => {
   try {
-    const { email, password, first_name, last_name, cnp, phone } = req.body;
+    const { email, old_password, new_password } = req.body;
 
-    if (!email || !password || !first_name || !last_name || !cnp || !phone) {
+    if (!email || !old_password || !new_password) {
       return res.status(400).json({ error: 'Toate campurile sunt obligatorii' });
     }
 
-    if (cnp.length !== 13) {
-      return res.status(400).json({ error: 'CNP-ul trebuie sa aiba 13 cifre' });
-    }
-
-    const [existing] = await db.query(
+    const [users] = await db.query(
       'SELECT * FROM users WHERE email = ?',
       [email]
     );
 
-    if (existing.length > 0) {
-      return res.status(409).json({ error: 'Email-ul este deja inregistrat' });
+    if (users.length === 0) {
+      return res.status(404).json({ error: 'Userul nu a fost gasit' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = users[0];
 
-    const [userResult] = await db.query(
-      `INSERT INTO users (email, password_hash, role, first_name, last_name, phone, is_active) 
-       VALUES (?, ?, 'PATIENT', ?, ?, ?, 1)`,
-      [email, hashedPassword, first_name, last_name, phone]
+    const isValid = await bcrypt.compare(old_password, user.password_hash);
+    if (!isValid) {
+      return res.status(401).json({ error: 'Parola veche este incorecta' });
+    }
+
+    if (new_password.length < 6) {
+      return res.status(400).json({ error: 'Parola noua trebuie sa aiba cel putin 6 caractere' });
+    }
+
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+    await db.query(
+      'UPDATE users SET password_hash = ? WHERE email = ?',
+      [hashedPassword, email]
     );
 
-    const userId = userResult.insertId;
-
-    const [patientResult] = await db.query(
-      `INSERT INTO patients (user_id, cnp) VALUES (?, ?)`,
-      [userId, cnp]
-    );
-
-    const patientId = patientResult.insertId;
-
-    res.json({
-      success: true,
-      token: `token_${userId}_${Date.now()}`,
-      patient_id: patientId,
-      first_name,
-      last_name,
-      email,
-    });
-
+    res.json({ success: true, message: 'Parola a fost schimbata cu succes' });
   } catch (error) {
-    console.error('Eroare register:', error);
+    console.error('Eroare reset password:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email-ul este obligatoriu' });
+    }
+
+    const [users] = await db.query(
+      'SELECT * FROM users WHERE email = ?',
+      [email]
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({ error: 'Email-ul nu a fost gasit' });
+    }
+
+    res.json({ success: true, message: 'Cererea a fost trimisa la administrator' });
+  } catch (error) {
+    console.error('Eroare forgot password:', error);
     res.status(500).json({ error: error.message });
   }
 });

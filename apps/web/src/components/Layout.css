@@ -1,5 +1,10 @@
 .sidebar {
-    background: linear-gradient( 180deg, #000000 0%, #021a12 50%, #033d2c 100%);
+    background: linear-gradient(
+        180deg,
+        #000000 0%,
+        #021a12 50%,
+        #033d2c 100%
+    );
     color: white;
     min-height: 100vh;
 }
@@ -20,4 +25,30 @@
 .sidebar p,
 .sidebar span {
     color: white;
+}
+
+.sidebar-link {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-badge {
+    background: #ef4444;
+    color: white !important;
+
+    min-width: 22px;
+    height: 22px;
+
+    border-radius: 999px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    padding: 0 6px;
 }

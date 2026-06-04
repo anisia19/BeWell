@@ -15,14 +15,18 @@ const DoctorLayout = () => {
 
             <VStack align="start" spacing={3}>
               <NavLink to="/doctor/dashboard/patients">Patients</NavLink>
+
               <NavLink to="/doctor/dashboard/alerts">Alerts</NavLink>
+
+              <NavLink to="/doctor/dashboard/settings">Settings</NavLink>
             </VStack>
           </div>
+
           <SideBarProfile />
         </Stack>
       </GridItem>
 
-      <GridItem bg="gray.50" p={6} minW="0" h="100vh" overflowY="auto">
+      <GridItem p={0}>
         <Outlet />
       </GridItem>
     </Grid>

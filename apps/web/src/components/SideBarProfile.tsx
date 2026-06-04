@@ -1,23 +1,29 @@
-import { Avatar, Text, Button, HStack, Stack } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./SidebarProfile.css";
 
 type User = {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   avatar?: string;
   role: "DOCTOR" | "PATIENT" | "ADMIN";
 };
 
-const user: User = {
-  name: "a",
-  email: "a@bewell.com",
-  avatar: "",
-  role: "PATIENT",
-};
-
 const SideBarProfile = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const storedUser = localStorage.getItem("user");
+  const rawUser: User | null = storedUser ? JSON.parse(storedUser) : null;
+  const user = rawUser
+    ? { ...rawUser, name: `${rawUser.firstName} ${rawUser.lastName}` }
+    : null;
+
+  const initials = user
+    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+    : "?";
+
+  const role = location.pathname.startsWith("/doctor") ? "Doctor" : "Patient";
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -27,26 +33,17 @@ const SideBarProfile = () => {
   return (
     <div className="sidebar-profile">
       <div className="sidebar-profile-divider" />
-
-      <HStack spacing={3} mb={4}>
-        <Avatar name={user.name} size="sm" bg="teal.600" />
-
-        <Stack spacing={0}>
-          <Text className="sidebar-profile-name">{user.name}</Text>
-          <Text className="sidebar-profile-role">
-            {user.role.toLowerCase()}
-          </Text>
-        </Stack>
-      </HStack>
-
-      <Button
-        variant="ghost"
-        onClick={handleLogout}
-        className="sidebar-profile-logout"
-      >
-        <i className="bi bi-box-arrow-right button-icon-spacing"></i>
+      <div className="sidebar-profile-user">
+        <div className="sidebar-profile-avatar">{initials}</div>
+        <div className="sidebar-profile-info">
+          <span className="sidebar-profile-name">{user?.name || "Utilizator"}</span>
+          <span className="sidebar-profile-role">{role}</span>
+        </div>
+      </div>
+      <button className="sidebar-profile-logout" onClick={handleLogout}>
+        <i className="bi bi-box-arrow-right"></i>
         Log out
-      </Button>
+      </button>
     </div>
   );
 };

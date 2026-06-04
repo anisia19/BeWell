@@ -87,3 +87,39 @@
 .clinic-info p:last-child {
   margin-bottom: 0;
 }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-box {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.modal-box h2 {
+  margin-bottom: 20px;
+  color: #111827;
+  font-size: 1.3rem;
+}
+
+.modal-box ol {
+  padding-left: 20px;
+  margin-bottom: 24px;
+  color: #4b5563;
+  line-height: 2;
+}
+
+.modal-box ol li {
+  margin-bottom: 4px;
+}

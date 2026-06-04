@@ -31,6 +31,10 @@ function App() {
 
       <Route path="/register" element={<RegisterPage />} />
 
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+
+      <Route path="/reset-password" element={<ResetPassword />} />
+
       <Route path="/doctor/dashboard" element={<DoctorLayout />}>
         <Route index element={<Navigate to="patients" replace />} />
 

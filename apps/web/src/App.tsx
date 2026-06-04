@@ -59,6 +59,8 @@ function App() {
         <Route path="settings" element={<PatientSettings />} />
       </Route>
     </Routes>
+
+    // mai trebuie sa adaugam admin dashboard-ul
   );
 }
 

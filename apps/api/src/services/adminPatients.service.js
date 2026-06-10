@@ -69,6 +69,7 @@ const calculateAge = (birthDate) => {
 const formatDateForMySQL = (date) => {
     return date.toISOString().split("T")[0];
 };
+
 export const getPatients = async() => {
     const [rows] = await pool.execute(`
     SELECT 
@@ -83,9 +84,18 @@ export const getPatients = async() => {
       p.age,
       p.gender,
       p.profession,
-      p.workplace
+      p.workplace,
+      pa.country,
+      pa.county,
+      pa.city,
+      pa.street,
+      pa.street_number AS streetNumber,
+      pa.building,
+      pa.apartment,
+      pa.postal_code AS postalCode
     FROM users u
     INNER JOIN patients p ON p.user_id = u.id
+    LEFT JOIN patient_addresses pa ON pa.patient_id = p.id
     WHERE u.role = 'PATIENT'
     ORDER BY u.id DESC
   `);
@@ -104,6 +114,14 @@ export const createPatient = async(data) => {
         profession,
         workplace,
         role,
+        country,
+        county,
+        city,
+        street,
+        streetNumber,
+        building,
+        apartment,
+        postalCode,
     } = data;
 
     const connection = await pool.getConnection();
@@ -142,7 +160,7 @@ export const createPatient = async(data) => {
             `
       INSERT INTO users 
         (email, password_hash, role, first_name, last_name, phone, is_active)
-        VALUES 
+      VALUES 
         (?, ?, ?, ?, ?, ?, 1)
       `, [email, passwordHash, role, firstName, lastName, phone]
         );
@@ -166,11 +184,42 @@ export const createPatient = async(data) => {
             ]
         );
 
+        const patientId = patientResult.insertId;
+
+        await connection.execute(
+            `
+      INSERT INTO patient_addresses
+        (
+          patient_id,
+          country,
+          county,
+          city,
+          street,
+          street_number,
+          building,
+          apartment,
+          postal_code
+        )
+      VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+                patientId,
+                country || null,
+                county || null,
+                city || null,
+                street || null,
+                streetNumber || null,
+                building || null,
+                apartment || null,
+                postalCode || null,
+            ]
+        );
+
         await connection.commit();
 
         return {
             userId,
-            patientId: patientResult.insertId,
+            patientId,
             email,
             firstName,
             lastName,
@@ -181,6 +230,15 @@ export const createPatient = async(data) => {
             gender,
             profession,
             workplace,
+            role,
+            country,
+            county,
+            city,
+            street,
+            streetNumber,
+            building,
+            apartment,
+            postalCode,
             generatedPassword: plainPassword,
         };
     } catch (error) {

@@ -18,6 +18,7 @@ import {
   Thead,
   Tr,
   useToast,
+  Heading,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import type { FormErrors, Patient, PatientForm } from "../types/patient";
@@ -36,6 +37,66 @@ const emptyForm: PatientForm = {
   profession: "",
   workplace: "",
   role: "PATIENT",
+  birthCounty: "",
+  country: "Romania",
+  county: "",
+  city: "",
+  street: "",
+  streetNumber: "",
+  building: "",
+  apartment: "",
+  postalCode: "",
+};
+
+const countyCodes: Record<string, string> = {
+  "01": "Alba",
+  "02": "Arad",
+  "03": "Arges",
+  "04": "Bacau",
+  "05": "Bihor",
+  "06": "Bistrita-Nasaud",
+  "07": "Botosani",
+  "08": "Brasov",
+  "09": "Braila",
+  "10": "Buzau",
+  "11": "Caras-Severin",
+  "12": "Cluj",
+  "13": "Constanta",
+  "14": "Covasna",
+  "15": "Dambovita",
+  "16": "Dolj",
+  "17": "Galati",
+  "18": "Gorj",
+  "19": "Harghita",
+  "20": "Hunedoara",
+  "21": "Ialomita",
+  "22": "Iasi",
+  "23": "Ilfov",
+  "24": "Maramures",
+  "25": "Mehedinti",
+  "26": "Mures",
+  "27": "Neamt",
+  "28": "Olt",
+  "29": "Prahova",
+  "30": "Satu Mare",
+  "31": "Salaj",
+  "32": "Sibiu",
+  "33": "Suceava",
+  "34": "Teleorman",
+  "35": "Timis",
+  "36": "Tulcea",
+  "37": "Vaslui",
+  "38": "Valcea",
+  "39": "Vrancea",
+  "40": "Bucuresti",
+  "41": "Bucuresti Sector 1",
+  "42": "Bucuresti Sector 2",
+  "43": "Bucuresti Sector 3",
+  "44": "Bucuresti Sector 4",
+  "45": "Bucuresti Sector 5",
+  "46": "Bucuresti Sector 6",
+  "51": "Calarasi",
+  "52": "Giurgiu",
 };
 
 const AdminDashboard = () => {
@@ -72,6 +133,7 @@ const AdminDashboard = () => {
         cnp: value,
         dateOfBirth: birthData?.birthDate || "",
         age: birthData?.age || "",
+        birthCounty: birthData?.birthCounty || "",
       }));
 
       return;
@@ -92,6 +154,8 @@ const AdminDashboard = () => {
     const yy = Number(cnp.substring(1, 3));
     const mm = Number(cnp.substring(3, 5));
     const dd = Number(cnp.substring(5, 7));
+    const countyCode = cnp.substring(7, 9);
+    const birthCounty = countyCodes[countyCode] || "";
 
     let year = 0;
 
@@ -126,6 +190,7 @@ const AdminDashboard = () => {
     return {
       birthDate,
       age: age.toString(),
+      birthCounty,
     };
   };
 
@@ -134,6 +199,7 @@ const AdminDashboard = () => {
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length > 0) return;
+    console.log("FORM SENT TO BACKEND:", form);
 
     try {
       setIsSubmitting(true);
@@ -269,6 +335,67 @@ const AdminDashboard = () => {
             </HStack>
           </RadioGroup>
         </FormControl>
+
+        <FormControl>
+          <FormLabel>Birth County</FormLabel>
+          <Input name="birthCounty" value={form.birthCounty} readOnly />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>Country</FormLabel>
+          <Input name="country" value={form.country} onChange={handleChange} />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>County</FormLabel>
+          <Input name="county" value={form.county} onChange={handleChange} />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>City</FormLabel>
+          <Input name="city" value={form.city} onChange={handleChange} />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>Street</FormLabel>
+          <Input name="street" value={form.street} onChange={handleChange} />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>Street Number</FormLabel>
+          <Input
+            name="streetNumber"
+            value={form.streetNumber}
+            onChange={handleChange}
+          />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>Building</FormLabel>
+          <Input
+            name="building"
+            value={form.building}
+            onChange={handleChange}
+          />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>Apartment</FormLabel>
+          <Input
+            name="apartment"
+            value={form.apartment}
+            onChange={handleChange}
+          />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>Postal Code</FormLabel>
+          <Input
+            name="postalCode"
+            value={form.postalCode}
+            onChange={handleChange}
+          />
+        </FormControl>
       </Grid>
 
       <Button
@@ -292,6 +419,15 @@ const AdminDashboard = () => {
               <Th>Gender</Th>
               <Th>Profession</Th>
               <Th>Workplace</Th>
+              <Th>Birth County</Th>
+              <Th>Country</Th>
+              <Th>County</Th>
+              <Th>City</Th>
+              <Th>Street</Th>
+              <Th>No.</Th>
+              <Th>Building</Th>
+              <Th>Apartment</Th>
+              <Th>Postal Code</Th>
             </Tr>
           </Thead>
 
@@ -308,6 +444,15 @@ const AdminDashboard = () => {
                 <Td>{patient.gender}</Td>
                 <Td>{patient.profession || "-"}</Td>
                 <Td>{patient.workplace || "-"}</Td>
+                <Td>{patient.birthCounty || "-"}</Td>
+                <Td>{patient.country || "-"}</Td>
+                <Td>{patient.county || "-"}</Td>
+                <Td>{patient.city || "-"}</Td>
+                <Td>{patient.street || "-"}</Td>
+                <Td>{patient.streetNumber || "-"}</Td>
+                <Td>{patient.building || "-"}</Td>
+                <Td>{patient.apartment || "-"}</Td>
+                <Td>{patient.postalCode || "-"}</Td>
               </Tr>
             ))}
           </Tbody>

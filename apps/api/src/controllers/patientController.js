@@ -16,6 +16,14 @@ export async function getAllPatients(req, res) {
             p.cnp,
             p.age,
             p.gender,
+            pa.country,
+            pa.county,
+            pa.city,
+            pa.street,
+            pa.street_number AS streetNumber,
+            pa.building,
+            pa.apartment,
+            pa.postal_code AS postalCode,
             CONCAT_WS(', ', pmp.medical_history, pmp.allergies) AS diagnosis,
             COUNT(a.id) AS alertsCount,
             CASE 
@@ -29,6 +37,7 @@ export async function getAllPatients(req, res) {
           LEFT JOIN alerts a 
             ON a.patient_id = p.id
             AND a.status = 'ACTIVE'
+          LEFT JOIN patient_addresses pa ON pa.patient_id = p.id
         
           WHERE u.role = 'PATIENT'
             AND (
@@ -77,10 +86,10 @@ export async function getPatientById(req, res) {
                 pa.county,
                 pa.city,
                 pa.street,
-                pa.street_number,
+                pa.street_number AS streetNumber,
                 pa.building,
                 pa.apartment,
-                pa.postal_code,
+                pa.postal_code AS postalCode,
                 pmp.medical_history,
                 pmp.allergies,
                 pmp.cardiology_consultations,
@@ -141,8 +150,7 @@ export async function createPatient(req, res) {
 
         // cautam userul existent
         const [existingUsers] = await connection.query(
-            `SELECT id FROM users WHERE email = ?`,
-            [body.email]
+            `SELECT id FROM users WHERE email = ?`, [body.email]
         );
 
         // daca nu exista userul
@@ -159,8 +167,7 @@ export async function createPatient(req, res) {
 
         // verificam daca exista deja pacient
         const [existingPatients] = await connection.query(
-            `SELECT id FROM patients WHERE user_id = ?`,
-            [userId]
+            `SELECT id FROM patients WHERE user_id = ?`, [userId]
         );
 
         if (existingPatients.length > 0) {
@@ -212,28 +219,28 @@ export async function createPatient(req, res) {
         const address = body.address;
 
         await connection.query(`
-            INSERT INTO patient_addresses (
-                patient_id,
-                country,
-                county,
-                city,
-                street,
-                street_number,
-                building,
-                apartment,
-                postal_code
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [
+        INSERT INTO patient_addresses (
+          patient_id,
+          country,
+          county,
+          city,
+          street,
+          street_number,
+          building,
+          apartment,
+          postal_code
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
             patientId,
-            address && address.country ? address.country : null,
-            address && address.county ? address.county : null,
-            address && address.city ? address.city : null,
-            address && address.street ? address.street : null,
-            address && address.street_number ? address.street_number : null,
-            address && address.building ? address.building : null,
-            address && address.apartment ? address.apartment : null,
-            address && address.postal_code ? address.postal_code : null
+            body.country || null,
+            body.county || null,
+            body.city || null,
+            body.street || null,
+            body.streetNumber || null,
+            body.building || null,
+            body.apartment || null,
+            body.postalCode || null,
         ]);
 
         // profil medical
@@ -311,8 +318,7 @@ export async function updatePatient(req, res) {
         await connection.beginTransaction();
 
         const [rows] = await connection.query(
-            `SELECT user_id FROM patients WHERE id = ?`,
-            [id]
+            `SELECT user_id FROM patients WHERE id = ?`, [id]
         );
 
         if (rows.length === 0) {
@@ -402,8 +408,7 @@ export async function deletePatient(req, res) {
     try {
 
         await pool.query(
-            `DELETE FROM users WHERE id = (SELECT user_id FROM patients WHERE id = ?)`,
-            [id]
+            `DELETE FROM users WHERE id = (SELECT user_id FROM patients WHERE id = ?)`, [id]
         );
 
         res.json({

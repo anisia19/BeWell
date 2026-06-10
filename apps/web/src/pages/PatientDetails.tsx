@@ -2,6 +2,15 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "./PatientDetails.css";
 
+type PatientData = {
+  first_name: string;
+  last_name: string;
+  age: number | null;
+  gender: string;
+  medical_history: string | null;
+  allergies: string | null;
+};
+
 type Recommendation = {
   id?: number;
   recommendation_type: string;
@@ -12,15 +21,19 @@ type Recommendation = {
 const PatientDetails = () => {
   const { id } = useParams();
 
+  const [patient, setPatient] = useState<PatientData | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
-
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-
   const [showForm, setShowForm] = useState(false);
-
   const [title, setTitle] = useState("");
-
   const [text, setText] = useState("");
+
+  useEffect(() => {
+    fetch(`http://localhost:3001/api/patients/${id}`)
+      .then((res) => res.json())
+      .then((data) => setPatient(data))
+      .catch((err) => console.error("Error fetching patient:", err));
+  }, [id]);
 
   useEffect(() => {
     fetch(`http://localhost:3001/api/recommendations/${id}`)
@@ -66,13 +79,20 @@ const PatientDetails = () => {
     }
   };
 
+  const patientName = patient
+    ? `${patient.first_name} ${patient.last_name}`
+    : "Loading...";
+
+  const patientSummary = patient
+    ? `${patient.medical_history || patient.allergies || "No diagnosis"} • ${patient.age ?? "?"} years old`
+    : "";
+
   return (
     <div className="patient-details-page">
       <div className="patient-header">
         <div>
-          <h1>Alexandra Chiriac</h1>
-
-          <p>Hypertension • 23 years old</p>
+          <h1>{patientName}</h1>
+          <p>{patientSummary}</p>
         </div>
 
         <span className="patient-status">Active</span>

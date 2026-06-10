@@ -30,11 +30,14 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { FormErrors, Patient, PatientForm } from "../types/patient";
+import type { FormErrors, Patient, PatientForm, UserRole } from "../types/patient";
 import {
   createPatient,
+  createUser,
   getPatients,
+  getUsersByRole,
   updatePatient,
+  updateUser,
 } from "../../services/adminPatientApi";
 import { validatePatientForm } from "../utils/patientValidation";
 import SearchBar from "../components/SearchBar";
@@ -126,8 +129,10 @@ const AdminDashboard = () => {
 
   const [form, setForm] = useState<PatientForm>(emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
-  const [patients, setPatients] = useState<Patient[]>([]);
+  const [users, setUsers] = useState<Patient[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [roleFilter, setRoleFilter] = useState<UserRole>("PATIENT");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -137,18 +142,22 @@ const AdminDashboard = () => {
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
 
   useEffect(() => {
-    getPatients()
-      .then(setPatients)
+    setUsers([]);
+    setSearchQuery("");
+    setDebouncedQuery("");
+    const fetch = roleFilter === "PATIENT" ? getPatients() : getUsersByRole(roleFilter);
+    fetch
+      .then(setUsers)
       .catch(() => {
         toast({
           title: "Error",
-          description: "Could not load patients",
+          description: "Could not load users",
           status: "error",
           duration: 3000,
           isClosable: true,
         });
       });
-  }, [toast]);
+  }, [roleFilter, toast]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -257,13 +266,16 @@ const AdminDashboard = () => {
 
     try {
       setIsSubmitting(true);
-      const createdPatient = await createPatient(form);
-      setPatients((prev) => [createdPatient, ...prev]);
+      const created = form.role === "PATIENT"
+        ? await createPatient(form)
+        : await createUser(form);
+      setUsers((prev) => [created, ...prev]);
       setForm(emptyForm);
       setErrors({});
+      setIsFormOpen(false);
       toast({
-        title: "Patient created",
-        description: `Generated password: ${createdPatient.generatedPassword}`,
+        title: "User created",
+        description: `Generated password: ${created.generatedPassword}`,
         status: "success",
         duration: 7000,
         isClosable: true,
@@ -272,7 +284,7 @@ const AdminDashboard = () => {
       toast({
         title: "Error",
         description:
-          error instanceof Error ? error.message : "Could not create patient",
+          error instanceof Error ? error.message : "Could not create user",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -289,15 +301,19 @@ const AdminDashboard = () => {
 
     try {
       setIsEditSubmitting(true);
-      await updatePatient(editingPatient!.patientId, editForm);
-      setPatients((prev) =>
+      if (editingPatient!.role === "PATIENT") {
+        await updatePatient(editingPatient!.patientId, editForm);
+      } else {
+        await updateUser(editingPatient!.userId, editForm);
+      }
+      setUsers((prev) =>
         prev.map((p) =>
-          p.patientId === editingPatient!.patientId ? { ...p, ...editForm } : p
+          p.userId === editingPatient!.userId ? { ...p, ...editForm } : p
         )
       );
       onEditClose();
       toast({
-        title: "Patient updated",
+        title: "User updated",
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -306,7 +322,7 @@ const AdminDashboard = () => {
       toast({
         title: "Error",
         description:
-          error instanceof Error ? error.message : "Could not update patient",
+          error instanceof Error ? error.message : "Could not update user",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -316,17 +332,16 @@ const AdminDashboard = () => {
     }
   };
 
-  const filteredPatients = debouncedQuery
-    ? patients.filter((p) => {
-        const q = debouncedQuery.toLowerCase();
-        return (
-          p.firstName?.toLowerCase().includes(q) ||
-          p.lastName?.toLowerCase().includes(q) ||
-          p.cnp?.includes(q) ||
-          p.email?.toLowerCase().includes(q)
-        );
-      })
-    : patients;
+  const filteredUsers = users.filter((p) => {
+    if (!debouncedQuery) return true;
+    const q = debouncedQuery.toLowerCase();
+    return (
+      p.firstName?.toLowerCase().includes(q) ||
+      p.lastName?.toLowerCase().includes(q) ||
+      p.cnp?.includes(q) ||
+      p.email?.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <Box p={8}>
@@ -344,255 +359,295 @@ const AdminDashboard = () => {
 
       <SearchBar
         value={searchQuery}
-        onChange={setSearchQuery}
+        onChange={(v) => {
+          setSearchQuery(v);
+          if (v) setIsFormOpen(false);
+        }}
         placeholder="Search by name, email or CNP..."
       />
 
-      {!searchQuery && <Box mt={8}>
-        <Grid templateColumns="repeat(3, 1fr)" gap={4} mb={6}>
-          <FormControl isInvalid={!!errors.email}>
-            <FormLabel>Email</FormLabel>
-            <Input name="email" value={form.email} onChange={handleChange} />
-            <FormErrorMessage>{errors.email}</FormErrorMessage>
-          </FormControl>
+      <HStack mt={6} mb={4} justify="space-between" align="center">
+        <HStack spacing={4}>
+          <Button
+            colorScheme="green"
+            onClick={() => {
+              setIsFormOpen((prev) => !prev);
+              setSearchQuery("");
+              setForm(emptyForm);
+              setErrors({});
+            }}
+          >
+            {isFormOpen ? "Cancel" : "Add Patient"}
+          </Button>
 
-          <FormControl isInvalid={!!errors.firstName}>
-            <FormLabel>First Name</FormLabel>
-            <Input
-              name="firstName"
-              value={form.firstName}
-              onChange={handleChange}
-            />
-            <FormErrorMessage>{errors.firstName}</FormErrorMessage>
-          </FormControl>
+          <RadioGroup
+            value={roleFilter}
+            onChange={(v) => {
+              setRoleFilter(v as UserRole);
+              setIsFormOpen(false);
+            }}
+          >
+            <HStack spacing={6}>
+              <Radio value="PATIENT">Patients</Radio>
+              <Radio value="DOCTOR">Doctors</Radio>
+              <Radio value="ADMIN">Admins</Radio>
+            </HStack>
+          </RadioGroup>
+        </HStack>
+      </HStack>
 
-          <FormControl isInvalid={!!errors.lastName}>
-            <FormLabel>Last Name</FormLabel>
-            <Input
-              name="lastName"
-              value={form.lastName}
-              onChange={handleChange}
-            />
-            <FormErrorMessage>{errors.lastName}</FormErrorMessage>
-          </FormControl>
+      {isFormOpen && (
+        <Box mb={8}>
+          <Grid templateColumns="repeat(3, 1fr)" gap={4} mb={6}>
+            <FormControl isInvalid={!!errors.email}>
+              <FormLabel>Email</FormLabel>
+              <Input name="email" value={form.email} onChange={handleChange} />
+              <FormErrorMessage>{errors.email}</FormErrorMessage>
+            </FormControl>
 
-          <FormControl isInvalid={!!errors.phone}>
-            <FormLabel>Phone</FormLabel>
-            <Input name="phone" value={form.phone} onChange={handleChange} />
-            <FormErrorMessage>{errors.phone}</FormErrorMessage>
-          </FormControl>
+            <FormControl isInvalid={!!errors.firstName}>
+              <FormLabel>First Name</FormLabel>
+              <Input
+                name="firstName"
+                value={form.firstName}
+                onChange={handleChange}
+              />
+              <FormErrorMessage>{errors.firstName}</FormErrorMessage>
+            </FormControl>
 
-          <FormControl isInvalid={!!errors.cnp}>
-            <FormLabel>CNP</FormLabel>
-            <Input name="cnp" value={form.cnp} onChange={handleChange} />
-            <FormErrorMessage>{errors.cnp}</FormErrorMessage>
-          </FormControl>
+            <FormControl isInvalid={!!errors.lastName}>
+              <FormLabel>Last Name</FormLabel>
+              <Input
+                name="lastName"
+                value={form.lastName}
+                onChange={handleChange}
+              />
+              <FormErrorMessage>{errors.lastName}</FormErrorMessage>
+            </FormControl>
 
-          <FormControl isInvalid={!!errors.dateOfBirth}>
-            <FormLabel>Date of Birth</FormLabel>
-            <Input
-              type="date"
-              name="dateOfBirth"
-              value={form.dateOfBirth}
-              readOnly
-            />
-            <FormErrorMessage>{errors.dateOfBirth}</FormErrorMessage>
-          </FormControl>
+            <FormControl isInvalid={!!errors.phone}>
+              <FormLabel>Phone</FormLabel>
+              <Input name="phone" value={form.phone} onChange={handleChange} />
+              <FormErrorMessage>{errors.phone}</FormErrorMessage>
+            </FormControl>
 
-          <FormControl isInvalid={!!errors.age}>
-            <FormLabel>Age</FormLabel>
-            <Input name="age" type="number" value={form.age} readOnly />
-            <FormErrorMessage>{errors.age}</FormErrorMessage>
-          </FormControl>
+            {form.role === "PATIENT" && (
+              <>
+                <FormControl isInvalid={!!errors.cnp}>
+                  <FormLabel>CNP</FormLabel>
+                  <Input name="cnp" value={form.cnp} onChange={handleChange} />
+                  <FormErrorMessage>{errors.cnp}</FormErrorMessage>
+                </FormControl>
 
-          <FormControl>
-            <FormLabel>Gender</FormLabel>
-            <Select name="gender" value={form.gender} onChange={handleChange}>
-              <option value="UNSPECIFIED">UNSPECIFIED</option>
-              <option value="FEMALE">FEMALE</option>
-              <option value="MALE">MALE</option>
-            </Select>
-          </FormControl>
+                <FormControl isInvalid={!!errors.dateOfBirth}>
+                  <FormLabel>Date of Birth</FormLabel>
+                  <Input
+                    type="date"
+                    name="dateOfBirth"
+                    value={form.dateOfBirth}
+                    readOnly
+                  />
+                  <FormErrorMessage>{errors.dateOfBirth}</FormErrorMessage>
+                </FormControl>
 
-          <FormControl>
-            <FormLabel>Profession</FormLabel>
-            <Input
-              name="profession"
-              value={form.profession}
-              onChange={handleChange}
-            />
-          </FormControl>
+                <FormControl isInvalid={!!errors.age}>
+                  <FormLabel>Age</FormLabel>
+                  <Input name="age" type="number" value={form.age} readOnly />
+                  <FormErrorMessage>{errors.age}</FormErrorMessage>
+                </FormControl>
 
-          <FormControl>
-            <FormLabel>Workplace</FormLabel>
-            <Input
-              name="workplace"
-              value={form.workplace}
-              onChange={handleChange}
-            />
-          </FormControl>
+                <FormControl>
+                  <FormLabel>Gender</FormLabel>
+                  <Select name="gender" value={form.gender} onChange={handleChange}>
+                    <option value="UNSPECIFIED">UNSPECIFIED</option>
+                    <option value="FEMALE">FEMALE</option>
+                    <option value="MALE">MALE</option>
+                  </Select>
+                </FormControl>
 
-          <FormControl>
-            <FormLabel>Role</FormLabel>
-            <RadioGroup
-              value={form.role}
-              onChange={(value) =>
-                setForm((prev) => ({
-                  ...prev,
-                  role: value as "PATIENT" | "DOCTOR" | "ADMIN",
-                }))
-              }
-            >
-              <HStack spacing={6}>
-                <Radio value="PATIENT">Patient</Radio>
-                <Radio value="DOCTOR">Doctor</Radio>
-                <Radio value="ADMIN">Admin</Radio>
-              </HStack>
-            </RadioGroup>
-          </FormControl>
+                <FormControl>
+                  <FormLabel>Profession</FormLabel>
+                  <Input
+                    name="profession"
+                    value={form.profession}
+                    onChange={handleChange}
+                  />
+                </FormControl>
 
-          <FormControl>
-            <FormLabel>Birth County</FormLabel>
-            <Input name="birthCounty" value={form.birthCounty} readOnly />
-          </FormControl>
+                <FormControl>
+                  <FormLabel>Workplace</FormLabel>
+                  <Input
+                    name="workplace"
+                    value={form.workplace}
+                    onChange={handleChange}
+                  />
+                </FormControl>
+              </>
+            )}
 
-          <FormControl>
-            <FormLabel>Country</FormLabel>
-            <Input
-              name="country"
-              value={form.country}
-              onChange={handleChange}
-            />
-          </FormControl>
+            <FormControl>
+              <FormLabel>Role</FormLabel>
+              <RadioGroup
+                value={form.role}
+                onChange={(value) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    role: value as UserRole,
+                  }))
+                }
+              >
+                <HStack spacing={6}>
+                  <Radio value="PATIENT">Patient</Radio>
+                  <Radio value="DOCTOR">Doctor</Radio>
+                  <Radio value="ADMIN">Admin</Radio>
+                </HStack>
+              </RadioGroup>
+            </FormControl>
 
-          <FormControl>
-            <FormLabel>County</FormLabel>
-            <Input name="county" value={form.county} onChange={handleChange} />
-          </FormControl>
+            {form.role === "PATIENT" && (
+              <>
+                <FormControl>
+                  <FormLabel>Birth County</FormLabel>
+                  <Input name="birthCounty" value={form.birthCounty} readOnly />
+                </FormControl>
 
-          <FormControl>
-            <FormLabel>City</FormLabel>
-            <Input name="city" value={form.city} onChange={handleChange} />
-          </FormControl>
+                <FormControl>
+                  <FormLabel>Country</FormLabel>
+                  <Input
+                    name="country"
+                    value={form.country}
+                    onChange={handleChange}
+                  />
+                </FormControl>
 
-          <FormControl>
-            <FormLabel>Street</FormLabel>
-            <Input name="street" value={form.street} onChange={handleChange} />
-          </FormControl>
+                <FormControl>
+                  <FormLabel>County</FormLabel>
+                  <Input
+                    name="county"
+                    value={form.county}
+                    onChange={handleChange}
+                  />
+                </FormControl>
 
-          <FormControl>
-            <FormLabel>Street Number</FormLabel>
-            <Input
-              name="streetNumber"
-              value={form.streetNumber}
-              onChange={handleChange}
-            />
-          </FormControl>
+                <FormControl>
+                  <FormLabel>City</FormLabel>
+                  <Input
+                    name="city"
+                    value={form.city}
+                    onChange={handleChange}
+                  />
+                </FormControl>
 
-          <FormControl>
-            <FormLabel>Building</FormLabel>
-            <Input
-              name="building"
-              value={form.building}
-              onChange={handleChange}
-            />
-          </FormControl>
+                <FormControl>
+                  <FormLabel>Street</FormLabel>
+                  <Input
+                    name="street"
+                    value={form.street}
+                    onChange={handleChange}
+                  />
+                </FormControl>
 
-          <FormControl>
-            <FormLabel>Apartment</FormLabel>
-            <Input
-              name="apartment"
-              value={form.apartment}
-              onChange={handleChange}
-            />
-          </FormControl>
+                <FormControl>
+                  <FormLabel>Street Number</FormLabel>
+                  <Input
+                    name="streetNumber"
+                    value={form.streetNumber}
+                    onChange={handleChange}
+                  />
+                </FormControl>
 
-          <FormControl>
-            <FormLabel>Postal Code</FormLabel>
-            <Input
-              name="postalCode"
-              value={form.postalCode}
-              onChange={handleChange}
-            />
-          </FormControl>
-        </Grid>
+                <FormControl>
+                  <FormLabel>Building</FormLabel>
+                  <Input
+                    name="building"
+                    value={form.building}
+                    onChange={handleChange}
+                  />
+                </FormControl>
 
-        <Button
-          colorScheme="green"
-          onClick={handleSubmit}
-          isLoading={isSubmitting}
-          mb={8}
-        >
-          Add Patient
-        </Button>
-      </Box>}
+                <FormControl>
+                  <FormLabel>Apartment</FormLabel>
+                  <Input
+                    name="apartment"
+                    value={form.apartment}
+                    onChange={handleChange}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Postal Code</FormLabel>
+                  <Input
+                    name="postalCode"
+                    value={form.postalCode}
+                    onChange={handleChange}
+                  />
+                </FormControl>
+              </>
+            )}
+          </Grid>
+
+          <Button
+            colorScheme="green"
+            onClick={handleSubmit}
+            isLoading={isSubmitting}
+          >
+            Add Patient
+          </Button>
+        </Box>
+      )}
 
       <TableContainer>
-        <Table variant="simple">
+        <Table variant="simple" size="sm">
           <Thead>
             <Tr>
               <Th>Email</Th>
               <Th>Name</Th>
               <Th>Phone</Th>
-              <Th>CNP</Th>
-              <Th>Age</Th>
-              <Th>Gender</Th>
-              <Th>Profession</Th>
-              <Th>Workplace</Th>
-              <Th>Birth County</Th>
-              <Th>Country</Th>
-              <Th>County</Th>
-              <Th>City</Th>
-              <Th>Street</Th>
-              <Th>No.</Th>
-              <Th>Building</Th>
-              <Th>Apartment</Th>
-              <Th>Postal Code</Th>
+              {roleFilter === "PATIENT" && (
+                <>
+                  <Th>CNP</Th>
+                  <Th>Age</Th>
+                  <Th>Gender</Th>
+                  <Th>City</Th>
+                </>
+              )}
               <Th>Actions</Th>
             </Tr>
           </Thead>
 
           <Tbody>
-            {debouncedQuery && filteredPatients.length === 0 ? (
+            {debouncedQuery && filteredUsers.length === 0 ? (
               <Tr>
-                <Td colSpan={18} textAlign="center" py={10} color="gray.400">
+                <Td colSpan={roleFilter === "PATIENT" ? 8 : 4} textAlign="center" py={10} color="gray.400">
                   <i className="bi bi-emoji-frown" style={{ fontSize: "2rem" }} />
-                  <Box mt={2}>No patients found for &ldquo;{debouncedQuery}&rdquo;</Box>
+                  <Box mt={2}>No results found for &ldquo;{debouncedQuery}&rdquo;</Box>
                 </Td>
               </Tr>
             ) : (
-            filteredPatients.map((patient) => (
-              <Tr key={patient.patientId}>
-                <Td>{patient.email}</Td>
-                <Td>
-                  {patient.firstName} {patient.lastName}
-                </Td>
-                <Td>{patient.phone}</Td>
-                <Td>{patient.cnp}</Td>
-                <Td>{patient.age}</Td>
-                <Td>{patient.gender}</Td>
-                <Td>{patient.profession || "-"}</Td>
-                <Td>{patient.workplace || "-"}</Td>
-                <Td>{patient.birthCounty || "-"}</Td>
-                <Td>{patient.country || "-"}</Td>
-                <Td>{patient.county || "-"}</Td>
-                <Td>{patient.city || "-"}</Td>
-                <Td>{patient.street || "-"}</Td>
-                <Td>{patient.streetNumber || "-"}</Td>
-                <Td>{patient.building || "-"}</Td>
-                <Td>{patient.apartment || "-"}</Td>
-                <Td>{patient.postalCode || "-"}</Td>
-                <Td>
-                  <Button
-                    size="sm"
-                    colorScheme="blue"
-                    onClick={() => handleEditOpen(patient)}
-                  >
-                    Edit
-                  </Button>
-                </Td>
-              </Tr>
-            ))
+              filteredUsers.map((user) => (
+                <Tr key={user.userId}>
+                  <Td>{user.email}</Td>
+                  <Td>{user.firstName} {user.lastName}</Td>
+                  <Td>{user.phone || "-"}</Td>
+                  {roleFilter === "PATIENT" && (
+                    <>
+                      <Td>{user.cnp || "-"}</Td>
+                      <Td>{user.age || "-"}</Td>
+                      <Td>{user.gender || "-"}</Td>
+                      <Td>{user.city || "-"}</Td>
+                    </>
+                  )}
+                  <Td>
+                    <Button
+                      size="sm"
+                      colorScheme="blue"
+                      onClick={() => handleEditOpen(user)}
+                    >
+                      Edit
+                    </Button>
+                  </Td>
+                </Tr>
+              ))
             )}
           </Tbody>
         </Table>
@@ -601,7 +656,7 @@ const AdminDashboard = () => {
       <Modal isOpen={isEditOpen} onClose={onEditClose} size="4xl" scrollBehavior="inside">
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Edit Patient</ModalHeader>
+          <ModalHeader>Edit User</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Grid templateColumns="repeat(3, 1fr)" gap={4}>
@@ -645,143 +700,146 @@ const AdminDashboard = () => {
                 <FormErrorMessage>{editErrors.phone}</FormErrorMessage>
               </FormControl>
 
-              <FormControl isInvalid={!!editErrors.cnp}>
-                <FormLabel>CNP</FormLabel>
-                <Input
-                  name="cnp"
-                  value={editForm.cnp}
-                  onChange={handleEditChange}
-                />
-                <FormErrorMessage>{editErrors.cnp}</FormErrorMessage>
-              </FormControl>
+              {editForm.role === "PATIENT" && (
+                <>
+                  <FormControl isInvalid={!!editErrors.cnp}>
+                    <FormLabel>CNP</FormLabel>
+                    <Input
+                      name="cnp"
+                      value={editForm.cnp}
+                      onChange={handleEditChange}
+                    />
+                    <FormErrorMessage>{editErrors.cnp}</FormErrorMessage>
+                  </FormControl>
 
-              <FormControl>
-                <FormLabel>Date of Birth</FormLabel>
-                <Input
-                  type="date"
-                  name="dateOfBirth"
-                  value={editForm.dateOfBirth}
-                  readOnly
-                />
-              </FormControl>
+                  <FormControl>
+                    <FormLabel>Date of Birth</FormLabel>
+                    <Input
+                      type="date"
+                      name="dateOfBirth"
+                      value={editForm.dateOfBirth}
+                      readOnly
+                    />
+                  </FormControl>
 
-              <FormControl>
-                <FormLabel>Age</FormLabel>
-                <Input
-                  name="age"
-                  type="number"
-                  value={editForm.age}
-                  readOnly
-                />
-              </FormControl>
+                  <FormControl>
+                    <FormLabel>Age</FormLabel>
+                    <Input name="age" type="number" value={editForm.age} readOnly />
+                  </FormControl>
 
-              <FormControl>
-                <FormLabel>Gender</FormLabel>
-                <Select
-                  name="gender"
-                  value={editForm.gender}
-                  onChange={handleEditChange}
-                >
-                  <option value="UNSPECIFIED">UNSPECIFIED</option>
-                  <option value="FEMALE">FEMALE</option>
-                  <option value="MALE">MALE</option>
-                </Select>
-              </FormControl>
+                  <FormControl>
+                    <FormLabel>Gender</FormLabel>
+                    <Select
+                      name="gender"
+                      value={editForm.gender}
+                      onChange={handleEditChange}
+                    >
+                      <option value="UNSPECIFIED">UNSPECIFIED</option>
+                      <option value="FEMALE">FEMALE</option>
+                      <option value="MALE">MALE</option>
+                    </Select>
+                  </FormControl>
 
-              <FormControl>
-                <FormLabel>Profession</FormLabel>
-                <Input
-                  name="profession"
-                  value={editForm.profession}
-                  onChange={handleEditChange}
-                />
-              </FormControl>
+                  <FormControl>
+                    <FormLabel>Profession</FormLabel>
+                    <Input
+                      name="profession"
+                      value={editForm.profession}
+                      onChange={handleEditChange}
+                    />
+                  </FormControl>
 
-              <FormControl>
-                <FormLabel>Workplace</FormLabel>
-                <Input
-                  name="workplace"
-                  value={editForm.workplace}
-                  onChange={handleEditChange}
-                />
-              </FormControl>
+                  <FormControl>
+                    <FormLabel>Workplace</FormLabel>
+                    <Input
+                      name="workplace"
+                      value={editForm.workplace}
+                      onChange={handleEditChange}
+                    />
+                  </FormControl>
+                </>
+              )}
 
-              <FormControl>
-                <FormLabel>Birth County</FormLabel>
-                <Input name="birthCounty" value={editForm.birthCounty} readOnly />
-              </FormControl>
+              {editForm.role === "PATIENT" && (
+                <>
+                  <FormControl>
+                    <FormLabel>Birth County</FormLabel>
+                    <Input name="birthCounty" value={editForm.birthCounty} readOnly />
+                  </FormControl>
 
-              <FormControl>
-                <FormLabel>Country</FormLabel>
-                <Input
-                  name="country"
-                  value={editForm.country}
-                  onChange={handleEditChange}
-                />
-              </FormControl>
+                  <FormControl>
+                    <FormLabel>Country</FormLabel>
+                    <Input
+                      name="country"
+                      value={editForm.country}
+                      onChange={handleEditChange}
+                    />
+                  </FormControl>
 
-              <FormControl>
-                <FormLabel>County</FormLabel>
-                <Input
-                  name="county"
-                  value={editForm.county}
-                  onChange={handleEditChange}
-                />
-              </FormControl>
+                  <FormControl>
+                    <FormLabel>County</FormLabel>
+                    <Input
+                      name="county"
+                      value={editForm.county}
+                      onChange={handleEditChange}
+                    />
+                  </FormControl>
 
-              <FormControl>
-                <FormLabel>City</FormLabel>
-                <Input
-                  name="city"
-                  value={editForm.city}
-                  onChange={handleEditChange}
-                />
-              </FormControl>
+                  <FormControl>
+                    <FormLabel>City</FormLabel>
+                    <Input
+                      name="city"
+                      value={editForm.city}
+                      onChange={handleEditChange}
+                    />
+                  </FormControl>
 
-              <FormControl>
-                <FormLabel>Street</FormLabel>
-                <Input
-                  name="street"
-                  value={editForm.street}
-                  onChange={handleEditChange}
-                />
-              </FormControl>
+                  <FormControl>
+                    <FormLabel>Street</FormLabel>
+                    <Input
+                      name="street"
+                      value={editForm.street}
+                      onChange={handleEditChange}
+                    />
+                  </FormControl>
 
-              <FormControl>
-                <FormLabel>Street Number</FormLabel>
-                <Input
-                  name="streetNumber"
-                  value={editForm.streetNumber}
-                  onChange={handleEditChange}
-                />
-              </FormControl>
+                  <FormControl>
+                    <FormLabel>Street Number</FormLabel>
+                    <Input
+                      name="streetNumber"
+                      value={editForm.streetNumber}
+                      onChange={handleEditChange}
+                    />
+                  </FormControl>
 
-              <FormControl>
-                <FormLabel>Building</FormLabel>
-                <Input
-                  name="building"
-                  value={editForm.building}
-                  onChange={handleEditChange}
-                />
-              </FormControl>
+                  <FormControl>
+                    <FormLabel>Building</FormLabel>
+                    <Input
+                      name="building"
+                      value={editForm.building}
+                      onChange={handleEditChange}
+                    />
+                  </FormControl>
 
-              <FormControl>
-                <FormLabel>Apartment</FormLabel>
-                <Input
-                  name="apartment"
-                  value={editForm.apartment}
-                  onChange={handleEditChange}
-                />
-              </FormControl>
+                  <FormControl>
+                    <FormLabel>Apartment</FormLabel>
+                    <Input
+                      name="apartment"
+                      value={editForm.apartment}
+                      onChange={handleEditChange}
+                    />
+                  </FormControl>
 
-              <FormControl>
-                <FormLabel>Postal Code</FormLabel>
-                <Input
-                  name="postalCode"
-                  value={editForm.postalCode}
-                  onChange={handleEditChange}
-                />
-              </FormControl>
+                  <FormControl>
+                    <FormLabel>Postal Code</FormLabel>
+                    <Input
+                      name="postalCode"
+                      value={editForm.postalCode}
+                      onChange={handleEditChange}
+                    />
+                  </FormControl>
+                </>
+              )}
             </Grid>
           </ModalBody>
 

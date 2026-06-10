@@ -79,6 +79,7 @@ export const getPatients = async() => {
       u.first_name AS firstName,
       u.last_name AS lastName,
       u.phone,
+      u.role,
       p.cnp,
       p.date_of_birth AS dateOfBirth,
       p.age,
@@ -101,6 +102,76 @@ export const getPatients = async() => {
   `);
 
     return rows;
+};
+
+export const getUsersByRole = async(role) => {
+    const [rows] = await pool.execute(`
+        SELECT
+            id AS userId,
+            email,
+            first_name AS firstName,
+            last_name AS lastName,
+            phone,
+            role
+        FROM users
+        WHERE role = ?
+        ORDER BY id DESC
+    `, [role]);
+    return rows;
+};
+
+export const createUser = async(data) => {
+    const { email, firstName, lastName, phone, role } = data;
+
+    const connection = await pool.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        const [existingEmail] = await connection.execute(
+            "SELECT id FROM users WHERE email = ?", [email]
+        );
+
+        if (existingEmail.length > 0) {
+            const error = new Error("Email already exists");
+            error.code = "DUPLICATE_EMAIL";
+            throw error;
+        }
+
+        const plainPassword = `${lastName.trim().replace(/\s+/g, "")}${generateRandomChars(8)}`;
+        const passwordHash = await bcrypt.hash(plainPassword, 10);
+
+        const [userResult] = await connection.execute(`
+            INSERT INTO users (email, password_hash, role, first_name, last_name, phone, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, 1)
+        `, [email, passwordHash, role, firstName, lastName, phone || null]);
+
+        await connection.commit();
+
+        return {
+            userId: userResult.insertId,
+            email,
+            firstName,
+            lastName,
+            phone,
+            role,
+            generatedPassword: plainPassword,
+        };
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
+};
+
+export const updateUser = async(userId, data) => {
+    const { email, firstName, lastName, phone } = data;
+
+    await pool.execute(
+        `UPDATE users SET email = ?, first_name = ?, last_name = ?, phone = ? WHERE id = ?`,
+        [email, firstName, lastName, phone || null, userId]
+    );
 };
 
 export const updatePatient = async(patientId, data) => {

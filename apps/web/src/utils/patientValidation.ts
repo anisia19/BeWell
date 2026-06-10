@@ -19,7 +19,7 @@ export const validatePatientForm = (form: PatientForm): FormErrors => {
     errors.phone = "Phone must start with 07 and have 10 digits";
   }
 
-  if (!/^\d{13}$/.test(form.cnp)) {
+  if (form.role === "PATIENT" && !/^\d{13}$/.test(form.cnp)) {
     errors.cnp = "CNP must have exactly 13 digits";
   }
 

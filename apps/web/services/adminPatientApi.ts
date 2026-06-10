@@ -1,6 +1,7 @@
-import type { Patient, PatientForm } from "../src/types/patient";
+import type { Patient, PatientForm, UserRole } from "../src/types/patient";
 
 const API_URL = "http://localhost:3001/api/admin/patients";
+const USERS_URL = "http://localhost:3001/api/admin/users";
 
 export const getPatients = async (): Promise<Patient[]> => {
   const response = await fetch(API_URL);
@@ -10,6 +11,38 @@ export const getPatients = async (): Promise<Patient[]> => {
   }
 
   return response.json();
+};
+
+export const getUsersByRole = async (role: UserRole): Promise<Patient[]> => {
+  const response = await fetch(`${USERS_URL}?role=${role}`);
+  if (!response.ok) throw new Error("Could not fetch users");
+  return response.json();
+};
+
+export const createUser = async (data: PatientForm): Promise<Patient> => {
+  const response = await fetch(USERS_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || "Could not create user");
+  return result.user;
+};
+
+export const updateUser = async (
+  userId: number,
+  data: PatientForm
+): Promise<void> => {
+  const response = await fetch(`${USERS_URL}/${userId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const result = await response.json();
+    throw new Error(result.error || "Could not update user");
+  }
 };
 
 export const updatePatient = async (

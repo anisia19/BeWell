@@ -1,49 +1,40 @@
-import { Outlet, Link } from "react-router-dom";
+import { Grid, GridItem, Text, VStack, Stack } from "@chakra-ui/react";
+import { NavLink, Outlet } from "react-router-dom";
+import "./Layout.css";
+import SideBarProfile from "./SideBarProfile";
 
 const DoctorLayout = () => {
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      <aside
-        style={{
-          width: "250px",
-          background: "#1e293b",
-          color: "white",
-          padding: "1rem",
-        }}
+    <Grid templateColumns="250px 1fr" minH="100vh">
+      <GridItem
+        className="sidebar"
+        p={4}
+        position="sticky"
+        top={0}
+        h="100vh"
+        overflowY="auto"
       >
-        <h2>Doctor Panel</h2>
+        <Stack h="100%" justify="space-between">
+          <div>
+            <Text fontWeight="bold" mb={4} fontSize="xl">
+              BeWell
+            </Text>
 
-        <nav>
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            <li>
-              <Link to="/doctor/dashboard">Dashboard</Link>
-            </li>
+            <VStack align="start" spacing={3}>
+              <NavLink to="/doctor/dashboard/patients">Patients</NavLink>
+              <NavLink to="/doctor/dashboard/alerts">Alerts</NavLink>
+              <NavLink to="/doctor/dashboard/settings">Settings</NavLink>
+            </VStack>
+          </div>
 
-            <li>
-              <Link to="/doctor/dashboard/patients">Patients</Link>
-            </li>
+          <SideBarProfile />
+        </Stack>
+      </GridItem>
 
-            <li>
-              <Link to="/doctor/dashboard/appointments">Appointments</Link>
-            </li>
-
-            <li>
-              <Link to="/doctor/dashboard/recommendations">
-                Recommendations
-              </Link>
-            </li>
-
-            <li>
-              <Link to="/doctor/dashboard/settings">Settings</Link>
-            </li>
-          </ul>
-        </nav>
-      </aside>
-
-      <main style={{ flex: 1, padding: "2rem" }}>
+      <GridItem p={0} h="100vh" overflowY="auto">
         <Outlet />
-      </main>
-    </div>
+      </GridItem>
+    </Grid>
   );
 };
 

@@ -2,15 +2,16 @@ import { SimpleGrid } from "@chakra-ui/react";
 import { FaHeartbeat, FaWaveSquare, FaThermometerHalf, FaTint } from "react-icons/fa";
 import SummaryCard from "./SummaryCard";
 import type { SensorReading } from "../hooks/useSensorReadings";
-import { classifyVital } from "../utils/vitalsClassifier";
+import { classifyVital, type PatientThresholds } from "../utils/vitalsClassifier";
 
 interface Props {
   latest?: SensorReading | null;
   loading?: boolean;
   isMock?: boolean;
+  thresholds?: PatientThresholds;
 }
 
-const PatientStatsGrid = ({ latest, loading, isMock = false }: Props) => {
+const PatientStatsGrid = ({ latest, loading, isMock = false, thresholds }: Props) => {
   const pulse = latest ? Math.round(Number(latest.pulseValue)) : null;
   const ecg = latest ? Number(Number(latest.ecgValue).toFixed(2)) : null;
   const temp = latest ? Number(Number(latest.temperatureValue).toFixed(1)) : null;
@@ -27,7 +28,7 @@ const PatientStatsGrid = ({ latest, loading, isMock = false }: Props) => {
         icon={FaHeartbeat}
         colorScheme="red"
         statusLabel={noDataLabel}
-        vitalStatus={pulse !== null ? classifyVital("bpm", pulse) : undefined}
+        vitalStatus={pulse !== null ? classifyVital("bpm", pulse, thresholds) : undefined}
       />
       <SummaryCard
         label="ECG Amplitude"
@@ -36,7 +37,7 @@ const PatientStatsGrid = ({ latest, loading, isMock = false }: Props) => {
         icon={FaWaveSquare}
         colorScheme="green"
         statusLabel={noDataLabel}
-        vitalStatus={ecg !== null ? classifyVital("ecgMv", ecg) : undefined}
+        vitalStatus={ecg !== null ? classifyVital("ecgMv", ecg, thresholds) : undefined}
       />
       <SummaryCard
         label="Body Temperature"
@@ -45,7 +46,7 @@ const PatientStatsGrid = ({ latest, loading, isMock = false }: Props) => {
         icon={FaThermometerHalf}
         colorScheme="orange"
         statusLabel={noDataLabel}
-        vitalStatus={temp !== null ? classifyVital("tempC", temp) : undefined}
+        vitalStatus={temp !== null ? classifyVital("tempC", temp, thresholds) : undefined}
       />
       <SummaryCard
         label="Ambient Humidity"
@@ -54,7 +55,7 @@ const PatientStatsGrid = ({ latest, loading, isMock = false }: Props) => {
         icon={FaTint}
         colorScheme="teal"
         statusLabel={noDataLabel}
-        vitalStatus={hum !== null ? classifyVital("humPercent", hum) : undefined}
+        vitalStatus={hum !== null ? classifyVital("humPercent", hum, thresholds) : undefined}
       />
     </SimpleGrid>
   );

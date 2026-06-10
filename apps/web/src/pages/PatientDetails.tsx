@@ -3,13 +3,62 @@ import { useParams } from "react-router-dom";
 import AllChartsData from "../components/AllChartsData";
 import "./PatientDetails.css";
 
+const API_BASE = "http://localhost:3001";
+
+interface Thresholds {
+  normal_pulse_min: string;
+  normal_pulse_max: string;
+  normal_ecg_min: string;
+  normal_ecg_max: string;
+  normal_temperature_min: string;
+  normal_temperature_max: string;
+  normal_humidity_min: string;
+  normal_humidity_max: string;
+}
+
+const emptyThresholds = (): Thresholds => ({
+  normal_pulse_min: "",
+  normal_pulse_max: "",
+  normal_ecg_min: "",
+  normal_ecg_max: "",
+  normal_temperature_min: "",
+  normal_temperature_max: "",
+  normal_humidity_min: "",
+  normal_humidity_max: "",
+});
+
 type PatientData = {
   first_name: string;
   last_name: string;
   age: number | null;
+  cnp: string | null;
   gender: string;
   medical_history: string | null;
   allergies: string | null;
+};
+
+const calculateAgeFromCNP = (cnp: string | null): number | null => {
+  if (!cnp || cnp.length !== 13 || !/^\d{13}$/.test(cnp)) return null;
+  const s = parseInt(cnp[0]);
+  const year2 = parseInt(cnp.substring(1, 3));
+  const month = parseInt(cnp.substring(3, 5));
+  const day = parseInt(cnp.substring(5, 7));
+
+  let century: number;
+  if (s === 1 || s === 2) century = 1900;
+  else if (s === 3 || s === 4) century = 1800;
+  else if (s === 5 || s === 6) century = 2000;
+  else if (s === 7 || s === 8) century = 1900;
+  else return null;
+
+  const birthDate = new Date(century + year2, month - 1, day);
+  if (isNaN(birthDate.getTime())) return null;
+
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+  return age;
 };
 
 type Alert = {
@@ -49,35 +98,75 @@ const PatientDetails = () => {
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
+  const [thresholds, setThresholds] = useState<Thresholds>(emptyThresholds());
+  const [thresholdsSaved, setThresholdsSaved] = useState(false);
 
   useEffect(() => {
-    fetch(`http://localhost:3001/api/patients/${id}`)
+    fetch(`${API_BASE}/api/patients/${id}`)
       .then((res) => res.json())
       .then((data) => setPatient(data))
       .catch((err) => console.error("Error fetching patient:", err));
   }, [id]);
 
   useEffect(() => {
-    fetch(`http://localhost:3001/api/recommendations/${id}`)
+    fetch(`${API_BASE}/api/recommendations/${id}`)
       .then((res) => res.json())
       .then(setRecommendations)
       .catch((err) => console.error("Error fetching recommendations:", err));
   }, [id]);
 
   useEffect(() => {
+    fetch(`${API_BASE}/api/patients/${id}/thresholds`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && typeof data === "object") {
+          setThresholds({
+            normal_pulse_min: data.normal_pulse_min ?? "",
+            normal_pulse_max: data.normal_pulse_max ?? "",
+            normal_ecg_min: data.normal_ecg_min ?? "",
+            normal_ecg_max: data.normal_ecg_max ?? "",
+            normal_temperature_min: data.normal_temperature_min ?? "",
+            normal_temperature_max: data.normal_temperature_max ?? "",
+            normal_humidity_min: data.normal_humidity_min ?? "",
+            normal_humidity_max: data.normal_humidity_max ?? "",
+          });
+        }
+      })
+      .catch(() => {});
+  }, [id]);
+
+  useEffect(() => {
     if (activeTab !== "alerts") return;
     setIsLoadingAlerts(true);
-    fetch(`http://localhost:3001/api/alerts/patient/${id}`)
+    fetch(`${API_BASE}/api/alerts/patient/${id}`)
       .then((res) => res.json())
       .then(setAlerts)
       .catch((err) => console.error("Error fetching alerts:", err))
       .finally(() => setIsLoadingAlerts(false));
   }, [activeTab, id]);
 
+  const saveThresholds = async () => {
+    try {
+      await fetch(`${API_BASE}/api/patients/${id}/thresholds`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(thresholds),
+      });
+      setThresholdsSaved(true);
+      setTimeout(() => setThresholdsSaved(false), 3000);
+    } catch (err) {
+      console.error("Error saving thresholds:", err);
+    }
+  };
+
+  const handleThresholdChange = (field: keyof Thresholds, value: string) => {
+    setThresholds((prev) => ({ ...prev, [field]: value }));
+  };
+
   const addRecommendation = async () => {
     if (!title || !text) return;
     try {
-      await fetch("http://localhost:3001/api/recommendations", {
+      await fetch(`${API_BASE}/api/recommendations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -87,7 +176,7 @@ const PatientDetails = () => {
           instructions: text,
         }),
       });
-      const updated = await fetch(`http://localhost:3001/api/recommendations/${id}`);
+      const updated = await fetch(`${API_BASE}/api/recommendations/${id}`);
       setRecommendations(await updated.json());
       setTitle("");
       setText("");
@@ -102,7 +191,7 @@ const PatientDetails = () => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     setIsSubmittingAlert(true);
     try {
-      const res = await fetch("http://localhost:3001/api/alerts", {
+      const res = await fetch(`${API_BASE}/api/alerts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -126,7 +215,7 @@ const PatientDetails = () => {
 
   const acknowledgeAlert = async (alertId: number) => {
     try {
-      await fetch(`http://localhost:3001/api/alerts/${alertId}/acknowledge`, { method: "PUT" });
+      await fetch(`${API_BASE}/api/alerts/${alertId}/acknowledge`, { method: "PUT" });
       setAlerts((prev) =>
         prev.map((a) =>
           a.id === alertId ? { ...a, status: "RESOLVED", resolved_at: new Date().toISOString() } : a
@@ -137,9 +226,14 @@ const PatientDetails = () => {
     }
   };
 
+  const patientAge = patient
+    ? (patient.age ?? calculateAgeFromCNP(patient.cnp))
+    : null;
+
   const patientName = patient ? `${patient.first_name} ${patient.last_name}` : "Loading...";
+
   const patientSummary = patient
-    ? `${patient.medical_history || patient.allergies || "No diagnosis"} • ${patient.age ?? "?"} years old`
+    ? `${patient.medical_history || patient.allergies || "No diagnosis"} • ${patientAge ?? "?"} years old`
     : "";
 
   return (
@@ -319,9 +413,65 @@ const PatientDetails = () => {
 
       {activeTab === "thresholds" && (
         <div className="section-card">
-          <h2>Thresholds</h2>
-          <p>Heart Rate max: 110 BPM</p>
-          <p>SpO2 min: 94%</p>
+          <div className="recommendations-header">
+            <h2>Patient Thresholds</h2>
+            <button className="new-btn" onClick={saveThresholds}>
+              {thresholdsSaved ? "Saved ✓" : "Save"}
+            </button>
+          </div>
+          <p style={{ color: "#6b7280", marginBottom: 24, fontSize: "0.95rem" }}>
+            Define the normal range for each vital. Values outside this range will be flagged as Low or High.
+          </p>
+
+          <div className="thresholds-grid">
+            <div className="threshold-group">
+              <h3>Heart Rate (BPM)</h3>
+              <div className="threshold-row">
+                <label>Min</label>
+                <input type="number" placeholder="e.g. 60" value={thresholds.normal_pulse_min}
+                  onChange={(e) => handleThresholdChange("normal_pulse_min", e.target.value)} />
+                <label>Max</label>
+                <input type="number" placeholder="e.g. 100" value={thresholds.normal_pulse_max}
+                  onChange={(e) => handleThresholdChange("normal_pulse_max", e.target.value)} />
+              </div>
+            </div>
+
+            <div className="threshold-group">
+              <h3>ECG Amplitude (mV)</h3>
+              <div className="threshold-row">
+                <label>Min</label>
+                <input type="number" step="0.01" placeholder="e.g. 0" value={thresholds.normal_ecg_min}
+                  onChange={(e) => handleThresholdChange("normal_ecg_min", e.target.value)} />
+                <label>Max</label>
+                <input type="number" step="0.01" placeholder="e.g. 1.0" value={thresholds.normal_ecg_max}
+                  onChange={(e) => handleThresholdChange("normal_ecg_max", e.target.value)} />
+              </div>
+            </div>
+
+            <div className="threshold-group">
+              <h3>Temperature (°C)</h3>
+              <div className="threshold-row">
+                <label>Min</label>
+                <input type="number" step="0.1" placeholder="e.g. 36.1" value={thresholds.normal_temperature_min}
+                  onChange={(e) => handleThresholdChange("normal_temperature_min", e.target.value)} />
+                <label>Max</label>
+                <input type="number" step="0.1" placeholder="e.g. 37.2" value={thresholds.normal_temperature_max}
+                  onChange={(e) => handleThresholdChange("normal_temperature_max", e.target.value)} />
+              </div>
+            </div>
+
+            <div className="threshold-group">
+              <h3>Humidity (%)</h3>
+              <div className="threshold-row">
+                <label>Min</label>
+                <input type="number" placeholder="e.g. 30" value={thresholds.normal_humidity_min}
+                  onChange={(e) => handleThresholdChange("normal_humidity_min", e.target.value)} />
+                <label>Max</label>
+                <input type="number" placeholder="e.g. 60" value={thresholds.normal_humidity_max}
+                  onChange={(e) => handleThresholdChange("normal_humidity_max", e.target.value)} />
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

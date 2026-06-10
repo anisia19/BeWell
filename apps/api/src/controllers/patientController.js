@@ -405,6 +405,68 @@ export async function updatePatient(req, res) {
     }
 }
 
+export async function getPatientThresholds(req, res) {
+    const id = req.params.id;
+    try {
+        const [rows] = await pool.query(`
+            SELECT
+                normal_ecg_min, normal_ecg_max,
+                normal_pulse_min, normal_pulse_max,
+                normal_temperature_min, normal_temperature_max,
+                normal_humidity_min, normal_humidity_max
+            FROM patient_medical_profiles
+            WHERE patient_id = ?
+            LIMIT 1
+        `, [id]);
+        res.json(rows[0] ?? {});
+    } catch (error) {
+        console.error('GET thresholds error:', error);
+        res.status(500).json({ error: 'Failed to fetch thresholds' });
+    }
+}
+
+export async function updatePatientThresholds(req, res) {
+    const id = req.params.id;
+    const {
+        normal_ecg_min, normal_ecg_max,
+        normal_pulse_min, normal_pulse_max,
+        normal_temperature_min, normal_temperature_max,
+        normal_humidity_min, normal_humidity_max,
+    } = req.body;
+
+    const toVal = (v) => (v === '' || v === undefined ? null : Number(v));
+
+    try {
+        await pool.query(`
+            INSERT INTO patient_medical_profiles (patient_id,
+                normal_ecg_min, normal_ecg_max,
+                normal_pulse_min, normal_pulse_max,
+                normal_temperature_min, normal_temperature_max,
+                normal_humidity_min, normal_humidity_max)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                normal_ecg_min = VALUES(normal_ecg_min),
+                normal_ecg_max = VALUES(normal_ecg_max),
+                normal_pulse_min = VALUES(normal_pulse_min),
+                normal_pulse_max = VALUES(normal_pulse_max),
+                normal_temperature_min = VALUES(normal_temperature_min),
+                normal_temperature_max = VALUES(normal_temperature_max),
+                normal_humidity_min = VALUES(normal_humidity_min),
+                normal_humidity_max = VALUES(normal_humidity_max)
+        `, [
+            id,
+            toVal(normal_ecg_min), toVal(normal_ecg_max),
+            toVal(normal_pulse_min), toVal(normal_pulse_max),
+            toVal(normal_temperature_min), toVal(normal_temperature_max),
+            toVal(normal_humidity_min), toVal(normal_humidity_max),
+        ]);
+        res.json({ message: 'Thresholds updated' });
+    } catch (error) {
+        console.error('PUT thresholds error:', error);
+        res.status(500).json({ error: 'Failed to update thresholds' });
+    }
+}
+
 export async function getPatientByUserId(req, res) {
     const userId = req.params.userId;
     try {

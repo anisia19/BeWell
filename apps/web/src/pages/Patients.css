@@ -1,3 +1,9 @@
+.patients-page {
+  min-height: 100vh;
+  background: #eef7f9;
+  padding: 28px;
+}
+
 .patients-header-row {
     display: flex;
     justify-content: space-between;

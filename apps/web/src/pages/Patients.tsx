@@ -93,24 +93,20 @@ function Patients() {
   }, [loadMore]);
 
   return (
-    <>
-      <div className="patients-page">
-        <div className="patients-header-row">
-          <Heading as="h3" size="md">
-            Patients
-          </Heading>
+    <div className="patients-page">
+      <div className="patients-header-row">
+        <Heading as="h3" size="md">
+          Patients
+        </Heading>
 
-          <Button
-            variant="solid"
-            colorScheme="green"
-            onClick={() => navigate("/doctor/dashboard/add-patient")}
-          >
-            <i className="bi bi-person-add button-icon-spacing"></i>
-            Add Patient
-          </Button>
-        </div>
-
-        <Text fontSize="xs">{patients.length} patients loaded</Text>
+        <Button
+          variant="solid"
+          colorScheme="green"
+          onClick={() => navigate("/doctor/dashboard/add-patient")}
+        >
+          <i className="bi bi-person-add button-icon-spacing"></i>
+          Add Patient
+        </Button>
       </div>
 
       <div className="search-bar-patients">
@@ -121,6 +117,8 @@ function Patients() {
           onChange={setSearch}
         />
       </div>
+
+      <Text fontSize="xs" mb={3}>{patients.length} patients loaded</Text>
 
       <div className="patients-list-cards">
         {patients.map((p) => (
@@ -146,7 +144,7 @@ function Patients() {
           <Text color="gray.400" fontSize="sm">All patients loaded</Text>
         )}
       </div>
-    </>
+    </div>
   );
 }
 

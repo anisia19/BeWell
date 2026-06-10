@@ -196,3 +196,58 @@
   margin-bottom: 14px;
   color: #94a3b8;
 }
+
+.thresholds-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .thresholds-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.threshold-group {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.threshold-group h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 14px;
+}
+
+.threshold-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.threshold-row label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.threshold-row input {
+  flex: 1;
+  border: 1px solid #d9e5e8;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  outline: none;
+  background: white;
+  color: #111827;
+}
+
+.threshold-row input:focus {
+  border-color: #06b6d4;
+}

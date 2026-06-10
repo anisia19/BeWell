@@ -24,6 +24,7 @@ function SearchBar({
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          autoComplete="off"
         />
       </InputGroup>
     </div>

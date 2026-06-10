@@ -2,7 +2,12 @@ import bcrypt from "bcryptjs";
 import pool from "../config/db.js";
 
 const generateRandomChars = (length = 4) => {
-    return Math.random().toString(36).substring(2, 2 + length);
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+        result += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return result;
 };
 
 const generatePassword = (cnp, lastName) => {

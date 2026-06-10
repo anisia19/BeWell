@@ -123,6 +123,9 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } =
     useDisclosure();
+  const { isOpen: isPassOpen, onOpen: onPassOpen, onClose: onPassClose } =
+    useDisclosure();
+  const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -321,13 +324,8 @@ const AdminDashboard = () => {
       setForm(emptyForm);
       setErrors({});
       setIsFormOpen(false);
-      toast({
-        title: "User created",
-        description: `Generated password: ${created.generatedPassword}`,
-        status: "success",
-        duration: 7000,
-        isClosable: true,
-      });
+      setCreatedCredentials({ email: created.email, password: created.generatedPassword ?? "" });
+      onPassOpen();
     } catch (error) {
       toast({
         title: "Error",
@@ -909,6 +907,47 @@ const AdminDashboard = () => {
             >
               Save Changes
             </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={isPassOpen} onClose={onPassClose} isCentered size="md">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Account Created</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <Text mb={4} color="gray.600" fontSize="sm">
+              Share these credentials with the user. The password cannot be recovered after closing this window.
+            </Text>
+            <FormControl mb={3}>
+              <FormLabel fontSize="sm">Email</FormLabel>
+              <HStack>
+                <Input value={createdCredentials?.email ?? ""} isReadOnly fontFamily="mono" />
+                <Button
+                  size="sm"
+                  onClick={() => navigator.clipboard.writeText(createdCredentials?.email ?? "")}
+                >
+                  Copy
+                </Button>
+              </HStack>
+            </FormControl>
+            <FormControl>
+              <FormLabel fontSize="sm">Password</FormLabel>
+              <HStack>
+                <Input value={createdCredentials?.password ?? ""} isReadOnly fontFamily="mono" />
+                <Button
+                  size="sm"
+                  colorScheme="green"
+                  onClick={() => navigator.clipboard.writeText(createdCredentials?.password ?? "")}
+                >
+                  Copy
+                </Button>
+              </HStack>
+            </FormControl>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="green" onClick={onPassClose}>Done</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

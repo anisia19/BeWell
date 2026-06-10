@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Heading, Text, Button } from "@chakra-ui/react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Heading, Button, Spinner, Text } from "@chakra-ui/react";
 import "../index.css";
 import "./Patients.css";
 import PatientCard from "../components/PatientCard";
@@ -16,31 +16,73 @@ type Patient = {
   cnp: string;
 };
 
+const LIMIT = 10;
+
 function Patients() {
   const navigate = useNavigate();
 
   const [patients, setPatients] = useState<Patient[]>([]);
-
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [isFetching, setIsFetching] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
-  useEffect(() => {
-    fetch("http://localhost:3001/api/patients")
-      .then((res) => res.json())
-      .then((data) => {
-        setPatients(data);
-      })
-      .catch((err) => console.error("Error fetching patients:", err));
+  const isFetchingRef = useRef(false);
+  const hasMoreRef = useRef(true);
+  const offsetRef = useRef(0);
+  const searchRef = useRef("");
+  const loaderRef = useRef<HTMLDivElement>(null);
+
+  const loadMore = useCallback(async () => {
+    if (isFetchingRef.current || !hasMoreRef.current) return;
+    isFetchingRef.current = true;
+    setIsFetching(true);
+    try {
+      const s = searchRef.current;
+      const url = `http://localhost:3001/api/patients?limit=${LIMIT}&offset=${offsetRef.current}${s ? `&search=${encodeURIComponent(s)}` : ""}`;
+      const res = await fetch(url);
+      const data: Patient[] = await res.json();
+      setPatients((prev) => [...prev, ...data]);
+      offsetRef.current += data.length;
+      if (data.length < LIMIT) {
+        hasMoreRef.current = false;
+        setHasMore(false);
+      }
+    } catch (err) {
+      console.error("Error fetching patients:", err);
+    } finally {
+      isFetchingRef.current = false;
+      setIsFetching(false);
+    }
   }, []);
 
   useEffect(() => {
-    const delay = setTimeout(() => {
-      fetch(`http://localhost:3001/api/patients?search=${search}`)
-        .then((res) => res.json())
-        .then((data) => setPatients(data));
-    }, 300);
-
-    return () => clearTimeout(delay);
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
   }, [search]);
+
+  useEffect(() => {
+    searchRef.current = debouncedSearch;
+    setPatients([]);
+    offsetRef.current = 0;
+    hasMoreRef.current = true;
+    isFetchingRef.current = false;
+    setHasMore(true);
+    loadMore();
+  }, [debouncedSearch, loadMore]);
+
+  useEffect(() => {
+    const sentinel = loaderRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) loadMore();
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadMore]);
 
   return (
     <>
@@ -60,7 +102,7 @@ function Patients() {
           </Button>
         </div>
 
-        <Text fontSize="xs">{patients.length} total patients</Text>
+        <Text fontSize="xs">{patients.length} patients loaded</Text>
       </div>
 
       <div className="search-bar-patients">
@@ -88,6 +130,13 @@ function Patients() {
             }
           />
         ))}
+      </div>
+
+      <div ref={loaderRef} style={{ textAlign: "center", padding: "1.5rem 0" }}>
+        {isFetching && <Spinner color="green.400" />}
+        {!hasMore && patients.length > 0 && (
+          <Text color="gray.400" fontSize="sm">All patients loaded</Text>
+        )}
       </div>
     </>
   );

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import AllChartsData from "../components/AllChartsData";
 import "./PatientDetails.css";
 
 type PatientData = {
@@ -179,20 +180,7 @@ const PatientDetails = () => {
       </div>
 
       {activeTab === "overview" && (
-        <div className="details-grid">
-          <div className="details-card">
-            <h2>Heart Rate</h2>
-            <p className="big-value">78 BPM</p>
-          </div>
-          <div className="details-card">
-            <h2>SpO2</h2>
-            <p className="big-value">98%</p>
-          </div>
-          <div className="details-card">
-            <h2>Temperature</h2>
-            <p className="big-value">36.8°C</p>
-          </div>
-        </div>
+        <AllChartsData patientId={Number(id)} />
       )}
 
       {activeTab === "alerts" && (

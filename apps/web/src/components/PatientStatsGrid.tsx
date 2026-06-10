@@ -1,78 +1,61 @@
 import { SimpleGrid } from "@chakra-ui/react";
-import { 
-  FaHeartbeat, 
-  FaWaveSquare, 
-  FaProjectDiagram, 
-  FaChartBar, 
-  FaThermometerHalf, 
-  FaTint 
-} from "react-icons/fa";
-import SummaryCard from "./SummaryCard"; // Asigură-te că importul este corect
+import { FaHeartbeat, FaWaveSquare, FaThermometerHalf, FaTint } from "react-icons/fa";
+import SummaryCard from "./SummaryCard";
+import type { SensorReading } from "../hooks/useSensorReadings";
+import { classifyVital } from "../utils/vitalsClassifier";
 
-const PatientStatsGrid = () => {
+interface Props {
+  latest?: SensorReading | null;
+  loading?: boolean;
+  isMock?: boolean;
+}
+
+const PatientStatsGrid = ({ latest, loading, isMock = false }: Props) => {
+  const pulse = latest ? Math.round(Number(latest.pulseValue)) : null;
+  const ecg = latest ? Number(Number(latest.ecgValue).toFixed(2)) : null;
+  const temp = latest ? Number(Number(latest.temperatureValue).toFixed(1)) : null;
+  const hum = latest ? Math.round(Number(latest.humidityValue)) : null;
+
+  const noDataLabel = loading ? "Loading..." : isMock ? "Demo data" : "No data";
+
   return (
-    <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} mb={8} w="100%">
-      
-      {/* 1. Pentru PatientGraph (Heart Rate) */}
-      <SummaryCard 
-        label="Avg. Heart Rate" 
-        value={74} 
-        unit="BPM" 
-        icon={FaHeartbeat} 
-        colorScheme="red" 
-        statusLabel="Normal"
+    <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mb={8} w="100%">
+      <SummaryCard
+        label="Avg. Heart Rate"
+        value={pulse ?? "—"}
+        unit="BPM"
+        icon={FaHeartbeat}
+        colorScheme="red"
+        statusLabel={noDataLabel}
+        vitalStatus={pulse !== null ? classifyVital("bpm", pulse) : undefined}
       />
-
-      {/* 2. Pentru LiveECGGraph */}
-      <SummaryCard 
-        label="ECG Amplitude" 
-        value={1.45} 
-        unit="mV" 
-        icon={FaWaveSquare} 
-        colorScheme="green" 
-        statusLabel="Stable"
+      <SummaryCard
+        label="ECG Amplitude"
+        value={ecg ?? "—"}
+        unit="mV"
+        icon={FaWaveSquare}
+        colorScheme="green"
+        statusLabel={noDataLabel}
+        vitalStatus={ecg !== null ? classifyVital("ecgMv", ecg) : undefined}
       />
-
-      {/* 3. Pentru PoincarePlotGraph (HRV) */}
-      <SummaryCard 
-        label="HRV (RMSSD)" 
-        value={42} 
-        unit="ms" 
-        icon={FaProjectDiagram} 
-        colorScheme="purple" 
-        statusLabel="Good"
+      <SummaryCard
+        label="Body Temperature"
+        value={temp ?? "—"}
+        unit="°C"
+        icon={FaThermometerHalf}
+        colorScheme="orange"
+        statusLabel={noDataLabel}
+        vitalStatus={temp !== null ? classifyVital("tempC", temp) : undefined}
       />
-
-      {/* 4. Pentru SpectrogramGraph */}
-      <SummaryCard 
-        label="LF/HF Ratio" 
-        value={1.8} 
-        unit="ratio" 
-        icon={FaChartBar} 
-        colorScheme="orange" 
-        statusLabel="Relaxed"
+      <SummaryCard
+        label="Ambient Humidity"
+        value={hum ?? "—"}
+        unit="%"
+        icon={FaTint}
+        colorScheme="teal"
+        statusLabel={noDataLabel}
+        vitalStatus={hum !== null ? classifyVital("humPercent", hum) : undefined}
       />
-
-      {/* 5. Pentru TemperatureGraph */}
-      <SummaryCard 
-        label="Body Temperature" 
-        value={36.7} 
-        unit="°C" 
-        icon={FaThermometerHalf} 
-        colorScheme="red" 
-        statusLabel="Normal"
-      />
-
-      {/* 6. Pentru HumidityGraph */}
-      <SummaryCard 
-        label="Ambient Humidity" 
-        value={45} 
-        unit="%" 
-        icon={FaTint} 
-        colorScheme="teal" 
-        statusLabel="Optimal"
-      />
-
     </SimpleGrid>
   );
 };

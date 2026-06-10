@@ -2,6 +2,7 @@ import express from "express";
 import {
     getAllPatients,
     getPatientById,
+    getPatientByUserId,
     createPatient,
     updatePatient,
     deletePatient,
@@ -10,6 +11,7 @@ import {
 const router = express.Router();
 
 router.get("/", getAllPatients);
+router.get("/by-user/:userId", getPatientByUserId);
 router.get("/:id", getPatientById);
 router.post("/", createPatient);
 router.put("/:id", updatePatient);

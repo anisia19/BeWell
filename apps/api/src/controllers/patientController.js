@@ -405,6 +405,23 @@ export async function updatePatient(req, res) {
     }
 }
 
+export async function getPatientByUserId(req, res) {
+    const userId = req.params.userId;
+    try {
+        const [rows] = await pool.query(
+            `SELECT id FROM patients WHERE user_id = ? LIMIT 1`,
+            [userId]
+        );
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Patient not found for this user' });
+        }
+        res.json({ patientId: rows[0].id });
+    } catch (error) {
+        console.error('GET patient by user error:', error);
+        res.status(500).json({ error: 'Failed to fetch patient' });
+    }
+}
+
 export async function deletePatient(req, res) {
 
     const id = req.params.id;

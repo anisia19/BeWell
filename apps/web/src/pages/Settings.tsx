@@ -1,8 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./Settings.css";
 
+type Profile = {
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone: string | null;
+  role: string;
+};
+
 const Settings = () => {
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    if (!user.id) return;
+    fetch(`http://localhost:3001/api/auth/profile/${user.id}`)
+      .then((res) => res.json())
+      .then(setProfile)
+      .catch((err) => console.error("Error fetching profile:", err));
+  }, []);
+
+  const fullName = profile
+    ? `${profile.first_name} ${profile.last_name}`
+    : "Loading...";
 
   return (
     <div className="settings-page">
@@ -11,20 +33,20 @@ const Settings = () => {
       <div className="settings-card">
         <h2>Profile Information</h2>
         <div className="info-group">
-          <label>Doctor Name</label>
-          <p>John Doe</p>
+          <label>Name</label>
+          <p>{fullName}</p>
         </div>
         <div className="info-group">
           <label>Email</label>
-          <p>doctor1@bewell.com</p>
+          <p>{profile?.email ?? "—"}</p>
         </div>
         <div className="info-group">
           <label>Phone Number</label>
-          <p>0712345678</p>
+          <p>{profile?.phone ?? "—"}</p>
         </div>
         <div className="info-group">
           <label>Role</label>
-          <p>Doctor</p>
+          <p>{profile?.role ?? "—"}</p>
         </div>
         <p className="info-message">
           To modify your personal information, please contact the clinic administration.

@@ -132,4 +132,17 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
+router.get("/profile/:userId", async (req, res) => {
+  try {
+    const [rows] = await pool.execute(
+      "SELECT id, email, first_name, last_name, phone, role FROM users WHERE id = ?",
+      [req.params.userId]
+    );
+    if (rows.length === 0) return res.status(404).json({ error: "User not found" });
+    res.json(rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch profile" });
+  }
+});
+
 export default router;

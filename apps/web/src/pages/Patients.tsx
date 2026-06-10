@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Heading, Button, Spinner, Text } from "@chakra-ui/react";
+import { Heading, Spinner, Text } from "@chakra-ui/react";
 import "../index.css";
 import "./Patients.css";
 import PatientCard from "../components/PatientCard";
@@ -35,15 +35,24 @@ function Patients() {
 
   const loadMore = useCallback(async () => {
     if (isFetchingRef.current || !hasMoreRef.current) return;
+
     isFetchingRef.current = true;
     setIsFetching(true);
+
     try {
       const s = searchRef.current;
-      const url = `http://localhost:3001/api/patients?limit=${LIMIT}&offset=${offsetRef.current}${s ? `&search=${encodeURIComponent(s)}` : ""}`;
+
+      const url =
+        `http://localhost:3001/api/patients?limit=${LIMIT}&offset=${offsetRef.current}` +
+        (s ? `&search=${encodeURIComponent(s)}` : "");
+
       const res = await fetch(url);
       const data: Patient[] = await res.json();
+
       setPatients((prev) => [...prev, ...data]);
+
       offsetRef.current += data.length;
+
       if (data.length < LIMIT) {
         hasMoreRef.current = false;
         setHasMore(false);
@@ -53,42 +62,57 @@ function Patients() {
     } finally {
       isFetchingRef.current = false;
       setIsFetching(false);
-      // IntersectionObserver fires once on mount while the initial fetch is in-flight
-      // and won't re-fire if the sentinel stays visible. Re-check after each load.
+
       requestAnimationFrame(() => {
         if (hasMoreRef.current && loaderRef.current) {
           const { top } = loaderRef.current.getBoundingClientRect();
-          if (top < window.innerHeight) loadMore();
+
+          if (top < window.innerHeight) {
+            loadMore();
+          }
         }
       });
     }
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+
     return () => clearTimeout(timer);
   }, [search]);
 
   useEffect(() => {
     searchRef.current = debouncedSearch;
+
     setPatients([]);
+
     offsetRef.current = 0;
     hasMoreRef.current = true;
     isFetchingRef.current = false;
+
     setHasMore(true);
+
     loadMore();
   }, [debouncedSearch, loadMore]);
 
   useEffect(() => {
     const sentinel = loaderRef.current;
+
     if (!sentinel) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) loadMore();
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
       },
       { threshold: 0.1 }
     );
+
     observer.observe(sentinel);
+
     return () => observer.disconnect();
   }, [loadMore]);
 
@@ -98,16 +122,11 @@ function Patients() {
         <Heading as="h3" size="md">
           Patients
         </Heading>
-
-        <Button
-          variant="solid"
-          colorScheme="green"
-          onClick={() => navigate("/doctor/dashboard/add-patient")}
-        >
-          <i className="bi bi-person-add button-icon-spacing"></i>
-          Add Patient
-        </Button>
       </div>
+
+      <Text fontSize="xs">
+        {patients.length} total patients
+      </Text>
 
       <div className="search-bar-patients">
         <SearchBar
@@ -118,7 +137,9 @@ function Patients() {
         />
       </div>
 
-      <Text fontSize="xs" mb={3}>{patients.length} patients loaded</Text>
+      <Text fontSize="xs" mb={3}>
+        {patients.length} patients loaded
+      </Text>
 
       <div className="patients-list-cards">
         {patients.map((p) => (
@@ -132,16 +153,29 @@ function Patients() {
             diagnosis={p.diagnosis || "No medical info added"}
             status={p.status}
             onClick={() =>
-              navigate(`/doctor/dashboard/patient-details/${p.id}`)
+              navigate(
+                `/doctor/dashboard/patient-details/${p.id}`
+              )
             }
           />
         ))}
       </div>
 
-      <div ref={loaderRef} style={{ textAlign: "center", padding: "1.5rem 0" }}>
-        {isFetching && <Spinner color="green.400" />}
+      <div
+        ref={loaderRef}
+        style={{
+          textAlign: "center",
+          padding: "1.5rem 0",
+        }}
+      >
+        {isFetching && (
+          <Spinner color="green.400" />
+        )}
+
         {!hasMore && patients.length > 0 && (
-          <Text color="gray.400" fontSize="sm">All patients loaded</Text>
+          <Text color="gray.400" fontSize="sm">
+            All patients loaded
+          </Text>
         )}
       </div>
     </div>

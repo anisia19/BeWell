@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
-import DoctorLayout from "./components/DoctorLayout";
+
 import ProtectedPatientLayout from "./components/ProtectedPatientLayout";
 import ProtectedAdminLayout from "./components/ProtectedAdminLayout";
 

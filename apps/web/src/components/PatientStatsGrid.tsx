@@ -7,15 +7,16 @@ import { classifyVital } from "../utils/vitalsClassifier";
 interface Props {
   latest?: SensorReading | null;
   loading?: boolean;
+  isMock?: boolean;
 }
 
-const PatientStatsGrid = ({ latest, loading }: Props) => {
+const PatientStatsGrid = ({ latest, loading, isMock = false }: Props) => {
   const pulse = latest ? Math.round(Number(latest.pulseValue)) : null;
   const ecg = latest ? Number(Number(latest.ecgValue).toFixed(2)) : null;
   const temp = latest ? Number(Number(latest.temperatureValue).toFixed(1)) : null;
   const hum = latest ? Math.round(Number(latest.humidityValue)) : null;
 
-  const noDataLabel = loading ? "Loading..." : "No data";
+  const noDataLabel = loading ? "Loading..." : isMock ? "Demo data" : "No data";
 
   return (
     <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mb={8} w="100%">

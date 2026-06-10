@@ -7,9 +7,10 @@ const muiTheme = createTheme();
 
 interface Props {
   data?: { time: string; temp: number }[];
+  isMock?: boolean;
 }
 
-const TemperatureGraph = ({ data = [] }: Props) => {
+const TemperatureGraph = ({ data = [], isMock = false }: Props) => {
   const hasData = data.length > 0;
 
   const values = hasData ? data.map((d) => d.temp) : [];
@@ -30,7 +31,9 @@ const TemperatureGraph = ({ data = [] }: Props) => {
           </Box>
           <Box>
             <Heading size="md" color="gray.800">Temperature</Heading>
-            <Text fontSize="sm" color="gray.500" mt={1}>Celsius (°C) over time</Text>
+            <Text fontSize="sm" color="gray.500" mt={1}>
+              Celsius (°C) over time{isMock ? " · Demo data" : ""}
+            </Text>
           </Box>
         </HStack>
       </CardHeader>

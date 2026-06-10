@@ -7,9 +7,10 @@ const muiTheme = createTheme();
 
 interface Props {
   data?: { time: string; mv: number }[];
+  isMock?: boolean;
 }
 
-const LiveECGGraph = ({ data = [] }: Props) => {
+const LiveECGGraph = ({ data = [], isMock = false }: Props) => {
   const hasData = data.length > 0;
 
   const yMin = hasData ? Math.min(...data.map((d) => d.mv)) - 0.2 : -0.5;
@@ -24,7 +25,9 @@ const LiveECGGraph = ({ data = [] }: Props) => {
           </Box>
           <Box>
             <Heading size="md" color="gray.800">Live ECG</Heading>
-            <Text fontSize="sm" color="gray.500" mt={1}>Voltage (mV) over time</Text>
+            <Text fontSize="sm" color="gray.500" mt={1}>
+              Voltage (mV) over time{isMock ? " · Demo data" : ""}
+            </Text>
           </Box>
         </HStack>
       </CardHeader>

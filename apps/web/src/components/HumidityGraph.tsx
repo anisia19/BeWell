@@ -7,9 +7,10 @@ const muiTheme = createTheme();
 
 interface Props {
   data?: { time: string; hum: number }[];
+  isMock?: boolean;
 }
 
-const HumidityGraph = ({ data = [] }: Props) => {
+const HumidityGraph = ({ data = [], isMock = false }: Props) => {
   const hasData = data.length > 0;
 
   const values = hasData ? data.map((d) => d.hum) : [];
@@ -29,7 +30,9 @@ const HumidityGraph = ({ data = [] }: Props) => {
           </Box>
           <Box>
             <Heading size="md" color="gray.800">Humidity</Heading>
-            <Text fontSize="sm" color="gray.500" mt={1}>Percentage (%) over time</Text>
+            <Text fontSize="sm" color="gray.500" mt={1}>
+              Percentage (%) over time{isMock ? " · Demo data" : ""}
+            </Text>
           </Box>
         </HStack>
       </CardHeader>

@@ -1,4 +1,9 @@
 import { useState, useEffect, useRef } from "react";
+import {
+  type MockReading,
+  generateInitialMockReadings,
+  generateNextMockReading,
+} from "../utils/mockSensorData";
 
 const MAX_POINTS = 60;
 const POLL_INTERVAL_MS = 5000;
@@ -51,12 +56,36 @@ const spansMultipleDays = (list: SensorReading[]): boolean => {
   return first !== last;
 };
 
-export const useSensorReadings = (patientId: number) => {
+const mockToLatest = (m: MockReading): SensorReading => ({
+  id: 0,
+  patientId: 0,
+  wearableDeviceId: 0,
+  recordedAt: new Date().toISOString(),
+  ecgValue: m.mv,
+  pulseValue: m.bpm,
+  temperatureValue: m.temp,
+  humidityValue: m.hum,
+  aggregationWindowSeconds: 0,
+  isAlertTriggered: false,
+});
+
+export const useSensorReadings = (patientId: number | null) => {
   const [readings, setReadings] = useState<SensorReading[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mockReadings, setMockReadings] = useState<MockReading[]>([]);
   const lastIdRef = useRef<number | null>(null);
 
+  // Real data polling
   useEffect(() => {
+    if (patientId === null) {
+      setLoading(false);
+      return;
+    }
+
+    setReadings([]);
+    setLoading(true);
+    lastIdRef.current = null;
+
     const loadInitial = async () => {
       try {
         const res = await fetch(
@@ -87,7 +116,6 @@ export const useSensorReadings = (patientId: number) => {
         if (!Array.isArray(raw) || raw.length === 0) return;
         const newData: SensorReading[] = raw.map(coerceReading);
         lastIdRef.current = newData[newData.length - 1].id;
-        // Slide window: keep last MAX_POINTS, newest always on the right
         setReadings((prev) => [...prev, ...newData].slice(-MAX_POINTS));
       } catch {
         // silent
@@ -97,29 +125,51 @@ export const useSensorReadings = (patientId: number) => {
     return () => clearInterval(interval);
   }, [patientId]);
 
+  // Mock live simulation: starts when loading is done and there are no real readings
+  const isMock = !loading && readings.length === 0;
+
+  useEffect(() => {
+    if (!isMock) return;
+    setMockReadings(generateInitialMockReadings(MAX_POINTS));
+  }, [isMock]);
+
+  useEffect(() => {
+    if (!isMock) return;
+    const interval = setInterval(() => {
+      setMockReadings((prev) => {
+        if (prev.length === 0) return prev;
+        const next = generateNextMockReading(prev[prev.length - 1]);
+        return [...prev, next].slice(-MAX_POINTS);
+      });
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [isMock]);
+
   const multiDay = spansMultipleDays(readings);
 
-  const heartRateData = readings.map((r) => ({
-    time: formatTime(r.recordedAt, multiDay),
-    bpm: r.pulseValue,
-  }));
+  const heartRateData = isMock
+    ? mockReadings.map((m) => ({ time: m.time, bpm: m.bpm }))
+    : readings.map((r) => ({ time: formatTime(r.recordedAt, multiDay), bpm: r.pulseValue }));
 
-  const temperatureData = readings.map((r) => ({
-    time: formatTime(r.recordedAt, multiDay),
-    temp: r.temperatureValue,
-  }));
+  const temperatureData = isMock
+    ? mockReadings.map((m) => ({ time: m.time, temp: m.temp }))
+    : readings.map((r) => ({ time: formatTime(r.recordedAt, multiDay), temp: r.temperatureValue }));
 
-  const humidityData = readings.map((r) => ({
-    time: formatTime(r.recordedAt, multiDay),
-    hum: r.humidityValue,
-  }));
+  const humidityData = isMock
+    ? mockReadings.map((m) => ({ time: m.time, hum: m.hum }))
+    : readings.map((r) => ({ time: formatTime(r.recordedAt, multiDay), hum: r.humidityValue }));
 
-  const ecgData = readings.map((r) => ({
-    time: formatTime(r.recordedAt, multiDay),
-    mv: r.ecgValue,
-  }));
+  const ecgData = isMock
+    ? mockReadings.map((m) => ({ time: m.time, mv: m.mv }))
+    : readings.map((r) => ({ time: formatTime(r.recordedAt, multiDay), mv: r.ecgValue }));
 
-  const latest = readings.length > 0 ? readings[readings.length - 1] : null;
+  const latest: SensorReading | null = isMock
+    ? mockReadings.length > 0
+      ? mockToLatest(mockReadings[mockReadings.length - 1])
+      : null
+    : readings.length > 0
+    ? readings[readings.length - 1]
+    : null;
 
-  return { heartRateData, temperatureData, humidityData, ecgData, latest, loading };
+  return { heartRateData, temperatureData, humidityData, ecgData, latest, loading, isMock };
 };

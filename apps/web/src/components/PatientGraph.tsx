@@ -7,9 +7,10 @@ const muiTheme = createTheme();
 
 interface Props {
   data?: { time: string; bpm: number }[];
+  isMock?: boolean;
 }
 
-const PatientGraph = ({ data = [] }: Props) => {
+const PatientGraph = ({ data = [], isMock = false }: Props) => {
   const hasData = data.length > 0;
 
   const yMin = hasData ? Math.min(...data.map((d) => d.bpm)) - 5 : 40;
@@ -24,7 +25,9 @@ const PatientGraph = ({ data = [] }: Props) => {
           </Box>
           <Box>
             <Heading size="md" color="gray.800">Heart Rate</Heading>
-            <Text fontSize="sm" color="gray.500" mt={1}>Beats per minute (BPM) over time</Text>
+            <Text fontSize="sm" color="gray.500" mt={1}>
+              Beats per minute (BPM) over time{isMock ? " · Demo data" : ""}
+            </Text>
           </Box>
         </HStack>
       </CardHeader>

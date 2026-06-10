@@ -103,6 +103,79 @@ export const getPatients = async() => {
     return rows;
 };
 
+export const updatePatient = async(patientId, data) => {
+    const {
+        email,
+        firstName,
+        lastName,
+        phone,
+        cnp,
+        dateOfBirth,
+        age,
+        gender,
+        profession,
+        workplace,
+        country,
+        county,
+        city,
+        street,
+        streetNumber,
+        building,
+        apartment,
+        postalCode,
+    } = data;
+
+    const connection = await pool.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        const [rows] = await connection.execute(
+            "SELECT user_id FROM patients WHERE id = ?", [patientId]
+        );
+
+        if (rows.length === 0) {
+            const error = new Error("Patient not found");
+            error.code = "NOT_FOUND";
+            throw error;
+        }
+
+        const userId = rows[0].user_id;
+
+        await connection.execute(
+            `UPDATE users SET email = ?, first_name = ?, last_name = ?, phone = ? WHERE id = ?`,
+            [email, firstName, lastName, phone || null, userId]
+        );
+
+        await connection.execute(
+            `UPDATE patients SET cnp = ?, date_of_birth = ?, age = ?, gender = ?, profession = ?, workplace = ? WHERE id = ?`,
+            [cnp, dateOfBirth || null, age || null, gender, profession || null, workplace || null, patientId]
+        );
+
+        await connection.execute(
+            `INSERT INTO patient_addresses (patient_id, country, county, city, street, street_number, building, apartment, postal_code)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE
+               country = VALUES(country),
+               county = VALUES(county),
+               city = VALUES(city),
+               street = VALUES(street),
+               street_number = VALUES(street_number),
+               building = VALUES(building),
+               apartment = VALUES(apartment),
+               postal_code = VALUES(postal_code)`,
+            [patientId, country || null, county || null, city || null, street || null, streetNumber || null, building || null, apartment || null, postalCode || null]
+        );
+
+        await connection.commit();
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
+};
+
 export const createPatient = async(data) => {
     const {
         email,

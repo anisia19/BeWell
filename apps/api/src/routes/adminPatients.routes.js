@@ -2,6 +2,7 @@ import express from "express";
 import {
     createPatient,
     getPatients,
+    updatePatient,
 } from "../services/adminPatients.service.js";
 
 const router = express.Router();
@@ -33,6 +34,21 @@ router.post("/patients", async(req, res) => {
         }
 
         res.status(500).json({ error: "Could not create patient" });
+    }
+});
+
+router.put("/patients/:id", async(req, res) => {
+    try {
+        await updatePatient(req.params.id, req.body);
+        res.json({ message: "Updated successfully" });
+    } catch (error) {
+        console.error("PUT patient error:", error);
+
+        if (error.code === "NOT_FOUND") {
+            return res.status(404).json({ error: "Patient not found" });
+        }
+
+        res.status(500).json({ error: "Could not update patient" });
     }
 });
 

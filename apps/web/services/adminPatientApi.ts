@@ -12,6 +12,22 @@ export const getPatients = async (): Promise<Patient[]> => {
   return response.json();
 };
 
+export const updatePatient = async (
+  patientId: number,
+  data: PatientForm
+): Promise<void> => {
+  const response = await fetch(`${API_URL}/${patientId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const result = await response.json();
+    throw new Error(result.error || "Could not update patient");
+  }
+};
+
 export const createPatient = async (data: PatientForm): Promise<Patient> => {
   const response = await fetch(API_URL, {
     method: "POST",

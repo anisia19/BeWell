@@ -51,6 +51,7 @@ export async function getAllPatients(req, res) {
             )
 
           GROUP BY p.id
+          ORDER BY p.id DESC
           LIMIT ${Number(limit)} OFFSET ${Number(offset)}
         `, [search, search, search, search, search]);
 

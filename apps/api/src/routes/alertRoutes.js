@@ -20,6 +20,24 @@ router.get("/patient/:patientId", async (req, res) => {
     }
 });
 
+router.get("/user/:userId", async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT a.*,
+                CONCAT(d.first_name, ' ', d.last_name) AS doctor_name
+            FROM alerts a
+            JOIN patients p ON p.id = a.patient_id
+            LEFT JOIN users d ON d.id = a.doctor_id
+            WHERE p.user_id = ?
+            ORDER BY a.triggered_at DESC
+        `, [req.params.userId]);
+        res.json(rows);
+    } catch (error) {
+        console.error("GET alerts by user error:", error);
+        res.status(500).json({ error: "Failed to fetch alerts" });
+    }
+});
+
 router.post("/", async (req, res) => {
     const { patient_id, doctor_id, severity, message, rule_id } = req.body;
     if (!patient_id || !severity || !message) {

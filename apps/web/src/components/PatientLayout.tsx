@@ -1,11 +1,23 @@
+import { useEffect, useState } from "react";
 import { Grid, GridItem, Text, VStack, Stack } from "@chakra-ui/react";
 import { NavLink, Outlet } from "react-router-dom";
 import "./Layout.css";
 import SideBarProfile from "./SideBarProfile";
 
 const PatientLayout = () => {
-  const alertsCount = 3;
-  const recommendationsCount = 0;
+  const [alertsCount, setAlertsCount] = useState(0);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    if (!user.id) return;
+
+    fetch(`http://localhost:3001/api/alerts/user/${user.id}`)
+      .then((res) => res.json())
+      .then((data: { status: string }[]) => {
+        setAlertsCount(data.filter((a) => a.status === "ACTIVE").length);
+      })
+      .catch((err) => console.error("Error fetching alert count:", err));
+  }, []);
 
   return (
     <Grid templateColumns="250px 1fr" minH="100vh">
@@ -23,19 +35,16 @@ const PatientLayout = () => {
 
               <NavLink to="/patient/dashboard/alerts" className="sidebar-link">
                 <span>Alerts</span>
-
-                <span className="sidebar-badge">{alertsCount}</span>
+                {alertsCount > 0 && (
+                  <span className="sidebar-badge">{alertsCount}</span>
+                )}
               </NavLink>
 
               <NavLink
                 to="/patient/dashboard/recommendations"
                 className="sidebar-link"
               >
-                <span>Recommendations</span>
-
-                {recommendationsCount > 0 && (
-                  <span className="sidebar-badge">{recommendationsCount}</span>
-                )}
+                Recommendations
               </NavLink>
 
               <NavLink

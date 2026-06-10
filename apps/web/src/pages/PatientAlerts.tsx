@@ -1,49 +1,65 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./PatientAlerts.css";
 
-const initialAlerts = [
-  {
-    id: 1,
-    title: "HeartRate Alert",
-    severity: "Critical",
-    message: "Heart rate exceeded upper threshold (118 bpm > 110 bpm)",
-    time: "30m ago",
-    color: "critical",
-  },
-  {
-    id: 2,
-    title: "SpO2 Alert",
-    severity: "Medium",
-    message: "SpO2 dropped below lower threshold (93.2% < 94%)",
-    time: "1h ago",
-    color: "medium",
-  },
-  {
-    id: 3,
-    title: "Temperature Alert",
-    severity: "Low",
-    message: "Temperature slightly elevated (37.9°C > 37.5°C)",
-    time: "3h ago",
-    color: "low",
-  },
-];
+type Alert = {
+  id: number;
+  severity: string;
+  status: string;
+  message: string;
+  triggered_at: string;
+  resolved_at: string | null;
+  doctor_name?: string;
+};
+
+const formatTime = (iso: string) =>
+  new Date(iso).toLocaleString("ro-RO", { dateStyle: "short", timeStyle: "short" });
 
 const PatientAlerts = () => {
-  const [alerts, setAlerts] = useState(initialAlerts);
-  const [history, setHistory] = useState<any[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
 
-  const handleAcknowledge = (alert: any) => {
-    setHistory([
-      {
-        ...alert,
-        acknowledgedAt: new Date().toLocaleString(),
-      },
-      ...history,
-    ]);
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    if (!user.id) return;
 
-    setAlerts(alerts.filter((a) => a.id !== alert.id));
+    fetch(`http://localhost:3001/api/alerts/user/${user.id}`)
+      .then((res) => res.json())
+      .then((data) => setAlerts(data))
+      .catch((err) => console.error("Error fetching alerts:", err))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const handleAcknowledge = async (alert: Alert) => {
+    try {
+      await fetch(`http://localhost:3001/api/alerts/${alert.id}/acknowledge`, {
+        method: "PUT",
+      });
+      setAlerts((prev) =>
+        prev.map((a) =>
+          a.id === alert.id
+            ? { ...a, status: "RESOLVED", resolved_at: new Date().toISOString() }
+            : a
+        )
+      );
+    } catch (err) {
+      console.error("Error acknowledging alert:", err);
+    }
   };
+
+  const activeAlerts = alerts.filter((a) => a.status === "ACTIVE");
+  const resolvedAlerts = alerts.filter((a) => a.status === "RESOLVED");
+
+  if (isLoading) {
+    return (
+      <div className="alerts-page">
+        <div className="alerts-header">
+          <h1>My Alerts</h1>
+        </div>
+        <p style={{ color: "#6b7280" }}>Loading alerts...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="alerts-page">
@@ -51,7 +67,7 @@ const PatientAlerts = () => {
         <h1>My Alerts</h1>
 
         <div className="header-top">
-          <p>{alerts.length} active alerts</p>
+          <p>{activeAlerts.length} active alerts</p>
 
           <button
             className="history-btn"
@@ -63,65 +79,72 @@ const PatientAlerts = () => {
       </div>
 
       <div className="alerts-container">
-        {alerts.map((alert) => (
-          <div className="alert-card" key={alert.id}>
-            <div className="alert-left">
-              <div className={`alert-dot ${alert.color}`}></div>
+        {activeAlerts.length === 0 ? (
+          <p style={{ color: "#6b7280" }}>No active alerts. Everything looks good!</p>
+        ) : (
+          activeAlerts.map((alert) => (
+            <div className="alert-card" key={alert.id}>
+              <div className="alert-left">
+                <div className={`alert-dot ${alert.severity.toLowerCase()}`}></div>
 
-              <div className="alert-content">
-                <div className="alert-top">
-                  <h3>{alert.title}</h3>
+                <div className="alert-content">
+                  <div className="alert-top">
+                    <h3>{alert.message}</h3>
+                    <span className={`badge ${alert.severity.toLowerCase()}`}>
+                      {alert.severity}
+                    </span>
+                  </div>
 
-                  <span className={`badge ${alert.color}`}>
-                    {alert.severity}
-                  </span>
+                  {alert.doctor_name && (
+                    <p style={{ fontSize: "0.85rem", color: "#6b7280", margin: "2px 0" }}>
+                      From Dr. {alert.doctor_name}
+                    </p>
+                  )}
+
+                  <span className="alert-time">{formatTime(alert.triggered_at)}</span>
                 </div>
-
-                <p>{alert.message}</p>
-
-                <span className="alert-time">{alert.time}</span>
               </div>
-            </div>
 
-            <button
-              className="ack-btn"
-              onClick={() => handleAcknowledge(alert)}
-            >
-              Acknowledge
-            </button>
-          </div>
-        ))}
+              <button className="ack-btn" onClick={() => handleAcknowledge(alert)}>
+                Acknowledge
+              </button>
+            </div>
+          ))
+        )}
       </div>
 
       {showHistory && (
         <>
           <div className="alerts-header history-header">
             <h1>Alert History</h1>
-            <p>Acknowledged alerts from the last 7 days</p>
+            <p>Resolved alerts</p>
           </div>
 
           <div className="alerts-container">
-            {history.length === 0 ? (
-              <p>No acknowledged alerts yet.</p>
+            {resolvedAlerts.length === 0 ? (
+              <p style={{ color: "#6b7280" }}>No resolved alerts yet.</p>
             ) : (
-              history.map((alert, index) => (
-                <div className="alert-card history-card" key={index}>
+              resolvedAlerts.map((alert) => (
+                <div className="alert-card history-card" key={alert.id}>
                   <div className="alert-left">
-                    <div className={`alert-dot ${alert.color}`}></div>
+                    <div className={`alert-dot ${alert.severity.toLowerCase()}`}></div>
 
                     <div className="alert-content">
                       <div className="alert-top">
-                        <h3>{alert.title}</h3>
-
-                        <span className={`badge ${alert.color}`}>
+                        <h3>{alert.message}</h3>
+                        <span className={`badge ${alert.severity.toLowerCase()}`}>
                           {alert.severity}
                         </span>
                       </div>
 
-                      <p>{alert.message}</p>
+                      {alert.doctor_name && (
+                        <p style={{ fontSize: "0.85rem", color: "#6b7280", margin: "2px 0" }}>
+                          From Dr. {alert.doctor_name}
+                        </p>
+                      )}
 
                       <span className="alert-time">
-                        Acknowledged: {alert.acknowledgedAt}
+                        Resolved: {alert.resolved_at ? formatTime(alert.resolved_at) : "—"}
                       </span>
                     </div>
                   </div>
@@ -129,7 +152,7 @@ const PatientAlerts = () => {
               ))
             )}
           </div>
-        </> 
+        </>
       )}
     </div>
   );

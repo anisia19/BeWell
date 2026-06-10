@@ -46,12 +46,13 @@ export async function getAllPatients(req, res) {
               ? IS NULL OR
               u.first_name LIKE CONCAT('%', ?, '%') OR
               u.last_name LIKE CONCAT('%', ?, '%') OR
+              CONCAT(u.first_name, ' ', u.last_name) LIKE CONCAT('%', ?, '%') OR
               p.cnp LIKE CONCAT('%', ?, '%')
             )
 
           GROUP BY p.id
           LIMIT ${Number(limit)} OFFSET ${Number(offset)}
-        `, [search, search, search, search]);
+        `, [search, search, search, search, search]);
 
         res.json(rows);
 

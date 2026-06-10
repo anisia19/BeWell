@@ -29,6 +29,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import type { FormErrors, Patient, PatientForm } from "../types/patient";
 import {
   createPatient,
@@ -114,8 +115,14 @@ const countyCodes: Record<string, string> = {
 
 const AdminDashboard = () => {
   const toast = useToast();
+  const navigate = useNavigate();
   const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } =
     useDisclosure();
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    navigate("/");
+  };
 
   const [form, setForm] = useState<PatientForm>(emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -323,7 +330,17 @@ const AdminDashboard = () => {
 
   return (
     <Box p={8}>
-      <Heading mb={4}>Admin Dashboard</Heading>
+      <HStack justify="space-between" mb={4}>
+        <Heading>Admin Dashboard</Heading>
+        <Button
+          variant="outline"
+          colorScheme="red"
+          leftIcon={<i className="bi bi-box-arrow-right" />}
+          onClick={handleLogout}
+        >
+          Log out
+        </Button>
+      </HStack>
 
       <SearchBar
         value={searchQuery}

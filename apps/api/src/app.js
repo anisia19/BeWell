@@ -5,6 +5,7 @@ import patientRoutes from "./routes/patientRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import recommendationRoutes from "./routes/recommendationRoutes.js";
 import adminPatientsRoutes from "./routes/adminPatients.routes.js";
+import sensorReadingsRoutes from "./routes/sensorReadings.routes.js";
 
 const app = express();
 
@@ -27,5 +28,7 @@ app.use(
     "/api/recommendations",
     recommendationRoutes
 );
+
+app.use("/api/sensor-readings", sensorReadingsRoutes);
 
 export default app;

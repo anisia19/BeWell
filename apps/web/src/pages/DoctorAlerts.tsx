@@ -50,11 +50,13 @@ const DoctorAlerts = () => {
   const hasMoreRef = useRef(true);
   const offsetRef = useRef(0);
   const searchRef = useRef("");
+  const generationRef = useRef(0);
   const listContainerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const loadMorePatients = useCallback(async () => {
     if (isFetchingRef.current || !hasMoreRef.current) return;
+    const generation = generationRef.current;
     isFetchingRef.current = true;
     setIsFetchingPatients(true);
     try {
@@ -62,12 +64,10 @@ const DoctorAlerts = () => {
       const url = `http://localhost:3001/api/patients?limit=${LIMIT}&offset=${offsetRef.current}${s ? `&search=${encodeURIComponent(s)}` : ""}`;
       const res = await fetch(url);
       const data: Patient[] = await res.json();
+      if (generationRef.current !== generation) return;
       setPatients((prev) => {
-        const updated = [...prev, ...data];
-        if (prev.length === 0 && data.length > 0) {
-          setSelectedPatient(data[0]);
-        }
-        return updated;
+        if (prev.length === 0 && data.length > 0) setSelectedPatient(data[0]);
+        return [...prev, ...data];
       });
       offsetRef.current += data.length;
       if (data.length < LIMIT) {
@@ -75,10 +75,20 @@ const DoctorAlerts = () => {
         setHasMorePatients(false);
       }
     } catch (err) {
-      console.error("Error fetching patients:", err);
+      if (generationRef.current === generation)
+        console.error("Error fetching patients:", err);
     } finally {
-      isFetchingRef.current = false;
-      setIsFetchingPatients(false);
+      if (generationRef.current === generation) {
+        isFetchingRef.current = false;
+        setIsFetchingPatients(false);
+        requestAnimationFrame(() => {
+          if (hasMoreRef.current && sentinelRef.current && listContainerRef.current) {
+            const containerRect = listContainerRef.current.getBoundingClientRect();
+            const sentinelRect = sentinelRef.current.getBoundingClientRect();
+            if (sentinelRect.top < containerRect.bottom) loadMorePatients();
+          }
+        });
+      }
     }
   }, []);
 
@@ -88,6 +98,7 @@ const DoctorAlerts = () => {
   }, [search]);
 
   useEffect(() => {
+    generationRef.current += 1;
     searchRef.current = debouncedSearch;
     setPatients([]);
     setSelectedPatient(null);

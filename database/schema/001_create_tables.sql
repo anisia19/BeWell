@@ -199,27 +199,25 @@ CREATE TABLE recommendations (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     doctor_id BIGINT UNSIGNED NOT NULL,
     patient_id BIGINT UNSIGNED NOT NULL,
+
     recommendation_type VARCHAR(100) NOT NULL,
-    daily_duration_minutes INT NOT NULL,
-    instructions TEXT NULL,
-    start_date DATE NULL,
-    end_date DATE NULL,
-    status ENUM('ACTIVE', 'COMPLETED', 'CANCELLED') NOT NULL DEFAULT 'ACTIVE',
+
+    recommendation_description TEXT NOT NULL,
+
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
     PRIMARY KEY (id),
+
     CONSTRAINT fk_recommendations_doctor
         FOREIGN KEY (doctor_id) REFERENCES users(id)
         ON DELETE RESTRICT
         ON UPDATE CASCADE,
+
     CONSTRAINT fk_recommendations_patient
         FOREIGN KEY (patient_id) REFERENCES patients(id)
         ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    CONSTRAINT chk_recommendations_daily_duration
-        CHECK (daily_duration_minutes > 0),
-    CONSTRAINT chk_recommendations_dates
-        CHECK (start_date IS NULL OR end_date IS NULL OR start_date <= end_date)
+        ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE recommendation_schedules (

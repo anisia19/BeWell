@@ -3,113 +3,105 @@ import db from "../config/db.js";
 
 const router = express.Router();
 
-router.post("/", (req, res) => {
-  const {
-    patient_id,
-    recommendation_type,
-    daily_duration_minutes,
-    instructions,
-  } = req.body;
+// ========================================
+// CREATE RECOMMENDATION
+// ========================================
 
-  const doctorSql = `
-    SELECT doctor_id
-    FROM doctor_patient_assignments
-    WHERE patient_id = ?
-    LIMIT 1
-  `;
+router.post("/", async (req, res) => {
+  try {
+    const {
+      doctor_id,
+      patient_id,
+      recommendation_type,
+      recommendation_description,
+    } = req.body;
 
-  db.query(
-    doctorSql,
-    [patient_id],
-    (doctorErr, doctorResult) => {
-      if (doctorErr) {
-        console.log(doctorErr);
+    console.log("POST RECOMMENDATION");
+    console.log(req.body);
 
-        return res
-          .status(500)
-          .json(doctorErr);
-      }
-
-      if (doctorResult.length === 0) {
-        return res.status(404).json({
-          error:
-            "No doctor assigned to patient",
-        });
-      }
-
-      const doctor_id =
-        doctorResult[0].doctor_id;
-
-      const insertSql = `
-        INSERT INTO recommendations
-        (
-          doctor_id,
-          patient_id,
-          recommendation_type,
-          daily_duration_minutes,
-          instructions,
-          status
-        )
-        VALUES (?, ?, ?, ?, ?, 'active')
-      `;
-
-      db.query(
-        insertSql,
-        [
-          doctor_id,
-          patient_id,
-          recommendation_type,
-          daily_duration_minutes,
-          instructions,
-        ],
-        (err, result) => {
-          if (err) {
-            console.log(err);
-
-            return res
-              .status(500)
-              .json(err);
-          }
-
-          res.json({
-            success: true,
-          });
-        }
-      );
+    if (
+      !doctor_id ||
+      !patient_id ||
+      !recommendation_type ||
+      !recommendation_description
+    ) {
+      return res.status(400).json({
+        error: "Missing required fields",
+      });
     }
-  );
+
+    const [result] = await db.query(
+      `
+      INSERT INTO recommendations
+      (
+        doctor_id,
+        patient_id,
+        recommendation_type,
+        recommendation_description
+      )
+      VALUES (?, ?, ?, ?)
+      `,
+      [
+        doctor_id,
+        patient_id,
+        recommendation_type,
+        recommendation_description,
+      ]
+    );
+
+    res.status(201).json({
+      success: true,
+      recommendation_id: result.insertId,
+    });
+
+  } catch (error) {
+    console.error("CREATE RECOMMENDATION ERROR:", error);
+
+    res.status(500).json({
+      error: "Failed to create recommendation",
+    });
+  }
 });
 
-router.get("/:patientId", (req, res) => {
-  const { patientId } = req.params;
+// ========================================
+// GET RECOMMENDATIONS FOR PATIENT
+// ========================================
 
-  const sql = `
-    SELECT
-      recommendations.*,
-      CONCAT(
-        users.first_name,
-        ' ',
-        users.last_name
-      ) AS doctor_name
-    FROM recommendations
-    JOIN users
-    ON recommendations.doctor_id = users.id
-    WHERE recommendations.patient_id = ?
-  `;
+router.get("/:patientId", async (req, res) => {
+  try {
+    const { patientId } = req.params;
 
-  db.query(
-    sql,
-    [patientId],
-    (err, result) => {
-      if (err) {
-        console.log(err);
+    const [rows] = await db.query(
+      `
+      SELECT
+        r.id,
+        r.patient_id,
+        r.doctor_id,
+        r.recommendation_type,
+        r.recommendation_description,
+        CONCAT(
+          u.first_name,
+          ' ',
+          u.last_name
+        ) AS doctor_name
+      FROM recommendations r
+      JOIN users u
+        ON r.doctor_id = u.id
+      WHERE r.patient_id = ?
+      ORDER BY r.id DESC
+      `,
+      [patientId]
+    );
 
-        return res.status(500).json(err);
-      }
+    res.json(rows);
 
-      res.json(result);
-    }
-  );
+  } catch (error) {
+    console.error("GET RECOMMENDATIONS ERROR:", error);
+
+    res.status(500).json({
+      error: "Failed to fetch recommendations",
+    });
+  }
 });
 
 export default router;

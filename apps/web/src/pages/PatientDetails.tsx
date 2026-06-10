@@ -74,7 +74,7 @@ type Alert = {
 type Recommendation = {
   id?: number;
   recommendation_type: string;
-  instructions: string;
+  recommendation_description: string;
   doctor_name?: string;
 };
 
@@ -163,29 +163,55 @@ const PatientDetails = () => {
     setThresholds((prev) => ({ ...prev, [field]: value }));
   };
 
-  const addRecommendation = async () => {
-    if (!title || !text) return;
-    try {
-      await fetch(`${API_BASE}/api/recommendations`, {
+const addRecommendation = async () => {
+  if (!title || !text) return;
+
+  const user = JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
+
+  try {
+    const response = await fetch(
+      `${API_BASE}/api/recommendations`,
+      {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
+          doctor_id: user.id,
           patient_id: Number(id),
           recommendation_type: title,
-          daily_duration_minutes: 30,
-          instructions: text,
+          recommendation_description: text,
         }),
-      });
-      const updated = await fetch(`${API_BASE}/api/recommendations/${id}`);
-      setRecommendations(await updated.json());
-      setTitle("");
-      setText("");
-      setShowForm(false);
-    } catch (err) {
-      console.error("Error adding recommendation:", err);
-    }
-  };
+      }
+    );
+    const data = await response.json();
 
+    console.log("RESPONSE:", data);
+
+    if (!response.ok) {
+      console.error("BACKEND ERROR:", data);
+      return;
+    }
+
+    const updated = await fetch(
+      `${API_BASE}/api/recommendations/${id}`
+    );
+
+    setRecommendations(await updated.json());
+
+    setTitle("");
+    setText("");
+    setShowForm(false);
+
+  } catch (err) {
+    console.error(
+      "Error adding recommendation:",
+      err
+    );
+  }
+};
   const addAlert = async () => {
     if (!alertMessage.trim()) return;
     const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -401,7 +427,7 @@ const PatientDetails = () => {
             recommendations.map((recommendation) => (
               <div className="recommendation-item" key={recommendation.id}>
                 <h3>{recommendation.recommendation_type}</h3>
-                <p>{recommendation.instructions}</p>
+               <p>{recommendation.recommendation_description}</p>
                 <span className="recommendation-doctor">
                   Added by {recommendation.doctor_name}
                 </span>

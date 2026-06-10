@@ -4,17 +4,48 @@ import "./Recommendations.css";
 type Recommendation = {
   id?: number;
   recommendation_type: string;
-  instructions: string;
+  recommendation_description: string;
   doctor_name?: string;
 };
 
 const Recommendations = () => {
-  const patientId = 1;
+  const user = JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
+
+  const [patientId, setPatientId] =
+    useState<number | null>(null);
 
   const [recommendations, setRecommendations] =
     useState<Recommendation[]>([]);
 
   useEffect(() => {
+    const loadPatient = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3001/api/patients/by-user/${user.id}`
+        );
+
+       const patient = await response.json();
+
+console.log("PATIENT =", patient);
+
+setPatientId(patient.patientId)
+      } catch (err) {
+        console.error(
+          "Error loading patient:",
+          err
+        );
+      }
+    };
+
+    loadPatient();
+  }, [user.id]);
+
+  useEffect(() => {
+    console.log("PATIENT ID =", patientId);
+    if (!patientId) return;
+
     fetch(
       `http://localhost:3001/api/recommendations/${patientId}`
     )
@@ -28,7 +59,7 @@ const Recommendations = () => {
           err
         )
       );
-  }, []);
+  }, [patientId]);
 
   return (
     <div className="recommendations-page">
@@ -72,7 +103,7 @@ const Recommendations = () => {
 
                 <p>
                   {
-                    recommendation.instructions
+                    recommendation.recommendation_description
                   }
                 </p>
 

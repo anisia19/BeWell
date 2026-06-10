@@ -11,8 +11,10 @@ import {
 const router = express.Router();
 
 router.get("/patients", async(req, res) => {
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = parseInt(req.query.offset) || 0;
     try {
-        const patients = await getPatients();
+        const patients = await getPatients(limit, offset);
         res.json(patients);
     } catch (error) {
         console.error("GET patients error:", error);
@@ -60,8 +62,10 @@ router.get("/users", async(req, res) => {
     if (!role || !["DOCTOR", "ADMIN"].includes(role)) {
         return res.status(400).json({ error: "role must be DOCTOR or ADMIN" });
     }
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = parseInt(req.query.offset) || 0;
     try {
-        const users = await getUsersByRole(role);
+        const users = await getUsersByRole(role, limit, offset);
         res.json(users);
     } catch (error) {
         console.error("GET users error:", error);

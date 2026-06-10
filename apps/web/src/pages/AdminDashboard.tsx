@@ -19,6 +19,8 @@ import {
   Tr,
   useToast,
   Heading,
+  Spinner,
+  Text,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -28,7 +30,7 @@ import {
   ModalCloseButton,
   useDisclosure,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { FormErrors, Patient, PatientForm, UserRole } from "../types/patient";
 import {
@@ -134,6 +136,15 @@ const AdminDashboard = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [roleFilter, setRoleFilter] = useState<UserRole>("PATIENT");
 
+  const LIMIT = 10;
+  const [isFetchingUsers, setIsFetchingUsers] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const isFetchingRef = useRef(false);
+  const hasMoreRef = useRef(true);
+  const offsetRef = useRef(0);
+  const loaderRef = useRef<HTMLDivElement>(null);
+  const roleFilterRef = useRef<UserRole>("PATIENT");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
@@ -141,23 +152,60 @@ const AdminDashboard = () => {
   const [editErrors, setEditErrors] = useState<FormErrors>({});
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
 
+  const loadMore = useCallback(async () => {
+    if (isFetchingRef.current || !hasMoreRef.current) return;
+    isFetchingRef.current = true;
+    setIsFetchingUsers(true);
+    try {
+      const role = roleFilterRef.current;
+      const batch =
+        role === "PATIENT"
+          ? await getPatients(LIMIT, offsetRef.current)
+          : await getUsersByRole(role, LIMIT, offsetRef.current);
+      setUsers((prev) => [...prev, ...batch]);
+      offsetRef.current += batch.length;
+      if (batch.length < LIMIT) {
+        hasMoreRef.current = false;
+        setHasMore(false);
+      }
+    } catch {
+      toast({
+        title: "Error",
+        description: "Could not load users",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      isFetchingRef.current = false;
+      setIsFetchingUsers(false);
+    }
+  }, [toast]);
+
   useEffect(() => {
+    roleFilterRef.current = roleFilter;
     setUsers([]);
     setSearchQuery("");
     setDebouncedQuery("");
-    const fetch = roleFilter === "PATIENT" ? getPatients() : getUsersByRole(roleFilter);
-    fetch
-      .then(setUsers)
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "Could not load users",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      });
-  }, [roleFilter, toast]);
+    offsetRef.current = 0;
+    hasMoreRef.current = true;
+    isFetchingRef.current = false;
+    setHasMore(true);
+    loadMore();
+  }, [roleFilter, loadMore]);
+
+  useEffect(() => {
+    const sentinel = loaderRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) loadMore();
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadMore]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -652,6 +700,13 @@ const AdminDashboard = () => {
           </Tbody>
         </Table>
       </TableContainer>
+
+      <Box ref={loaderRef} py={6} textAlign="center">
+        {isFetchingUsers && <Spinner color="green.400" />}
+        {!hasMore && users.length > 0 && (
+          <Text color="gray.400" fontSize="sm">All users loaded</Text>
+        )}
+      </Box>
 
       <Modal isOpen={isEditOpen} onClose={onEditClose} size="4xl" scrollBehavior="inside">
         <ModalOverlay />

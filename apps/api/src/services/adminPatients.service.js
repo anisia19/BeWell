@@ -70,9 +70,9 @@ const formatDateForMySQL = (date) => {
     return date.toISOString().split("T")[0];
 };
 
-export const getPatients = async() => {
-    const [rows] = await pool.execute(`
-    SELECT 
+export const getPatients = async(limit = 10, offset = 0) => {
+    const [rows] = await pool.query(`
+    SELECT
       u.id AS userId,
       p.id AS patientId,
       u.email,
@@ -99,12 +99,13 @@ export const getPatients = async() => {
     LEFT JOIN patient_addresses pa ON pa.patient_id = p.id
     WHERE u.role = 'PATIENT'
     ORDER BY u.id DESC
+    LIMIT ${Number(limit)} OFFSET ${Number(offset)}
   `);
 
     return rows;
 };
 
-export const getUsersByRole = async(role) => {
+export const getUsersByRole = async(role, limit = 10, offset = 0) => {
     const [rows] = await pool.execute(`
         SELECT
             id AS userId,
@@ -116,6 +117,7 @@ export const getUsersByRole = async(role) => {
         FROM users
         WHERE role = ?
         ORDER BY id DESC
+        LIMIT ${Number(limit)} OFFSET ${Number(offset)}
     `, [role]);
     return rows;
 };

@@ -3,18 +3,18 @@ import type { Patient, PatientForm, UserRole } from "../src/types/patient";
 const API_URL = "http://localhost:3001/api/admin/patients";
 const USERS_URL = "http://localhost:3001/api/admin/users";
 
-export const getPatients = async (): Promise<Patient[]> => {
-  const response = await fetch(API_URL);
-
-  if (!response.ok) {
-    throw new Error("Could not fetch patients");
-  }
-
+export const getPatients = async (limit = 10, offset = 0): Promise<Patient[]> => {
+  const response = await fetch(`${API_URL}?limit=${limit}&offset=${offset}`);
+  if (!response.ok) throw new Error("Could not fetch patients");
   return response.json();
 };
 
-export const getUsersByRole = async (role: UserRole): Promise<Patient[]> => {
-  const response = await fetch(`${USERS_URL}?role=${role}`);
+export const getUsersByRole = async (
+  role: UserRole,
+  limit = 10,
+  offset = 0
+): Promise<Patient[]> => {
+  const response = await fetch(`${USERS_URL}?role=${role}&limit=${limit}&offset=${offset}`);
   if (!response.ok) throw new Error("Could not fetch users");
   return response.json();
 };

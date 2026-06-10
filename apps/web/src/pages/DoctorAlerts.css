@@ -52,6 +52,11 @@
   font-size: 0.85rem;
 }
 
+.alerts-patient-list-container {
+  overflow-y: auto;
+  max-height: calc(100vh - 240px);
+}
+
 .alerts-patient-list {
   display: flex;
   flex-direction: column;

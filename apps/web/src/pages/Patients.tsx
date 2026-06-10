@@ -53,6 +53,14 @@ function Patients() {
     } finally {
       isFetchingRef.current = false;
       setIsFetching(false);
+      // IntersectionObserver fires once on mount while the initial fetch is in-flight
+      // and won't re-fire if the sentinel stays visible. Re-check after each load.
+      requestAnimationFrame(() => {
+        if (hasMoreRef.current && loaderRef.current) {
+          const { top } = loaderRef.current.getBoundingClientRect();
+          if (top < window.innerHeight) loadMore();
+        }
+      });
     }
   }, []);
 

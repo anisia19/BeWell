@@ -5,6 +5,7 @@ import patientRoutes from "./routes/patientRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import recommendationRoutes from "./routes/recommendationRoutes.js";
 import adminPatientsRoutes from "./routes/adminPatients.routes.js";
+import alertRoutes from "./routes/alertRoutes.js";
 import sensorReadingsRoutes from "./routes/sensorReadings.routes.js";
 
 const app = express();
@@ -24,10 +25,9 @@ app.use("/api/patients", patientRoutes);
 
 app.use("/api/admin", adminPatientsRoutes);
 
-app.use(
-    "/api/recommendations",
-    recommendationRoutes
-);
+app.use("/api/recommendations", recommendationRoutes);
+
+app.use("/api/alerts", alertRoutes);
 
 app.use("/api/sensor-readings", sensorReadingsRoutes);
 

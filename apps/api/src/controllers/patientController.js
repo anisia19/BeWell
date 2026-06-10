@@ -2,7 +2,9 @@ import pool from '../config/db.js';
 
 export async function getAllPatients(req, res) {
     try {
-        const search = req.query.search;
+        const search = req.query.search || null;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = parseInt(req.query.offset) || 0;
 
         const [rows] = await pool.query(`
           SELECT
@@ -26,19 +28,19 @@ export async function getAllPatients(req, res) {
             pa.postal_code AS postalCode,
             CONCAT_WS(', ', pmp.medical_history, pmp.allergies) AS diagnosis,
             COUNT(a.id) AS alertsCount,
-            CASE 
+            CASE
               WHEN u.is_active = 1 THEN 'Active'
               ELSE 'Inactive'
             END AS status
-        
+
           FROM patients p
           JOIN users u ON p.user_id = u.id
           LEFT JOIN patient_medical_profiles pmp ON pmp.patient_id = p.id
-          LEFT JOIN alerts a 
+          LEFT JOIN alerts a
             ON a.patient_id = p.id
             AND a.status = 'ACTIVE'
           LEFT JOIN patient_addresses pa ON pa.patient_id = p.id
-        
+
           WHERE u.role = 'PATIENT'
             AND (
               ? IS NULL OR
@@ -46,8 +48,9 @@ export async function getAllPatients(req, res) {
               u.last_name LIKE CONCAT('%', ?, '%') OR
               p.cnp LIKE CONCAT('%', ?, '%')
             )
-        
+
           GROUP BY p.id
+          LIMIT ${Number(limit)} OFFSET ${Number(offset)}
         `, [search, search, search, search]);
 
         res.json(rows);

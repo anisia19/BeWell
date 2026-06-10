@@ -136,7 +136,6 @@ const AdminDashboard = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [users, setUsers] = useState<Patient[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isFormOpen, setIsFormOpen] = useState(false);
   const [roleFilter, setRoleFilter] = useState<UserRole>("PATIENT");
 
   const LIMIT = 10;
@@ -323,7 +322,6 @@ const AdminDashboard = () => {
       setUsers((prev) => [created, ...prev]);
       setForm(emptyForm);
       setErrors({});
-      setIsFormOpen(false);
       setCreatedCredentials({ email: created.email, password: created.generatedPassword ?? "" });
       onPassOpen();
     } catch (error) {
@@ -407,30 +405,18 @@ const AdminDashboard = () => {
         value={searchQuery}
         onChange={(v) => {
           setSearchQuery(v);
-          if (v) setIsFormOpen(false);
         }}
         placeholder="Search by name, email or CNP..."
       />
 
       <HStack mt={6} mb={4} justify="space-between" align="center">
         <HStack spacing={4}>
-          <Button
-            colorScheme="green"
-            onClick={() => {
-              setIsFormOpen((prev) => !prev);
-              setSearchQuery("");
-              setForm(emptyForm);
-              setErrors({});
-            }}
-          >
-            {isFormOpen ? "Cancel" : "Add Patient"}
-          </Button>
+     
 
           <RadioGroup
             value={roleFilter}
             onChange={(v) => {
               setRoleFilter(v as UserRole);
-              setIsFormOpen(false);
             }}
           >
             <HStack spacing={6}>
@@ -442,7 +428,7 @@ const AdminDashboard = () => {
         </HStack>
       </HStack>
 
-      {isFormOpen && (
+      {false && (
         <Box mb={8}>
           <Grid templateColumns="repeat(3, 1fr)" gap={4} mb={6}>
             <FormControl isInvalid={!!errors.email}>

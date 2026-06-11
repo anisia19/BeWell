@@ -14,16 +14,15 @@ function Welcome() {
           </Heading>
 
           <Text className="welcome-text">
-            Welcome! Please login or create an account to continue.
+            Welcome! Please login to continue.
           </Text>
 
           <div className="welcome-buttons">
-            <Button className="primary" onClick={() => navigate("/login")}>
+            <Button
+              className="primary"
+              onClick={() => navigate("/login")}
+            >
               Login
-            </Button>
-
-            <Button className="secondary" onClick={() => navigate("/register")}>
-              Register
             </Button>
           </div>
         </VStack>

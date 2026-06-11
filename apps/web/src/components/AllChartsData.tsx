@@ -5,6 +5,7 @@ import TemperatureGraph from "../components/TemperatureGraph";
 import HumidityGraph from "../components/HumidityGraph";
 import PatientStatsGrid from "../components/PatientStatsGrid";
 import { useSensorReadings } from "../hooks/useSensorReadings";
+import { useAutoAlerts } from "../hooks/useAutoAlerts";
 import type { PatientThresholds } from "../utils/vitalsClassifier";
 import "../pages/HomePagePatient.css";
 
@@ -65,6 +66,8 @@ const AllChartsData = ({ patientId: patientIdProp }: Props) => {
 
   const { heartRateData, temperatureData, humidityData, ecgData, latest, loading, isMock } =
     useSensorReadings(resolvedPatientId);
+
+  useAutoAlerts(resolvedPatientId, latest, thresholds, isMock);
 
   return (
     <div className="main">
